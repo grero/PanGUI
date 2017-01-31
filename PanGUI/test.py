@@ -1,3 +1,4 @@
+import PanGUI
 from pylab import gca
 import numpy as np
 
@@ -12,9 +13,9 @@ class PlotObject():
         ax.plot(self.data[i,:])
         return ax
 
-if __name__ == "__main__":
+def test():
     data = np.random.random((10, 1000))
     pp = PlotObject(data)
-    ppg = create_window(Main, pp)
+    ppg = PanGUI.create_window(PanGUI.Main, pp)
 
 
