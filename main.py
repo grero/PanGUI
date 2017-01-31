@@ -52,6 +52,11 @@ class Main(QMainWindow, Ui_MainWindow):
 
 
 def create_window(window_class):
+    """
+    Create a new window based on `window_class`. This works whether called from IPython terminal or as a script
+    :param window_class:
+    :return window:
+    """
     app_created = False
     app = QtCore.QCoreApplication.instance()
     if app is None:
