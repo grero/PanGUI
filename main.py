@@ -51,6 +51,20 @@ class Main(QMainWindow, Ui_MainWindow):
         self.currentIndex.setText(str(self.index))
 
 
+def create_window(window_class):
+    app_created = False
+    app = QtCore.QCoreApplication.instance()
+    if app is None:
+        app = QtGui.QApplication(sys.argv)
+        app_created = True
+    app.references = set()
+    window = window_class()
+    app.references.add(window)
+    window.show()
+    if app_created:
+        app.exec_()
+    return window
+
 if __name__ == "__main__":
     import numpy as np
 
@@ -64,9 +78,5 @@ if __name__ == "__main__":
     ax1f1.yaxis.set_ticks_position("left")
 
     ax1f1.plot(np.random.rand(5))
-
-    app = QtGui.QApplication(sys.argv)
-    myapp = Main()
-    myapp.addmpl(fig1)
-    myapp.show()
-    sys.exit(app.exec_())
+    window = create_window(Main)
+    window.addmpl(fig1)
