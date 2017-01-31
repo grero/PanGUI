@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt4 import QtCore, QtGui
 from PyQt4.uic import loadUiType
 from matplotlib.figure import Figure
@@ -6,7 +7,10 @@ from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
-Ui_MainWindow, QMainWindow = loadUiType("GUI.ui")
+guipath = __file__.split(os.sep)
+guipath[-1] = "GUI.ui"
+guifile = os.sep.join(guipath)
+Ui_MainWindow, QMainWindow = loadUiType(guifile)
 
 class Main(QMainWindow, Ui_MainWindow):
     def __init__(self, plotobject):
