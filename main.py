@@ -54,6 +54,7 @@ class Main(QMainWindow, Ui_MainWindow):
 def create_window(window_class):
     """
     Create a new window based on `window_class`. This works whether called from IPython terminal or as a script
+    Based on: http://cyrille.rossant.net/making-pyqt4-pyside-and-ipython-work-together/
     :param window_class:
     :return window:
     """
