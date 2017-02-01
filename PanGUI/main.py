@@ -34,7 +34,7 @@ class Main(QMainWindow, Ui_MainWindow):
         ax1f1.xaxis.set_ticks_position("bottom")
         ax1f1.yaxis.set_ticks_position("left")
         self.addmpl(fig1)
-        plotobject.plot(self.index,ax=self.fig.axes[0])
+        plotobject.plot(self.index,fig=self.fig)
         self.setWindowTitle(plotobject.title)
 
 
@@ -55,14 +55,14 @@ class Main(QMainWindow, Ui_MainWindow):
     def gonext(self):
         self.fig.axes[0].cla()
         self.index = min(self.plotobject.data.shape[0]-1, self.index+1)
-        self.plotobject.plot(self.index, ax=self.fig.axes[0])
+        self.plotobject.plot(self.index, fig=self.fig)
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 
     def goprev(self):
         self.fig.axes[0].cla()
         self.index = max(0, self.index-1)
-        self.plotobject.plot(self.index, ax=self.fig.axes[0])
+        self.plotobject.plot(self.index, fig=self.fig)
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 

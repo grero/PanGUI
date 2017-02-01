@@ -1,5 +1,5 @@
 import PanGUI
-from pylab import gca
+from pylab import gcf
 import numpy as np
 
 class PlotObject():
@@ -7,9 +7,10 @@ class PlotObject():
         self.data = data
         self.title = title
 
-    def plot(self,i,ax=None):
-        if ax is None:
-            ax = gca()
+    def plot(self,i,fig=None):
+        if fig is None:
+            fig = gcf()
+        ax = fig.add_subplot(111)
         ax.plot(self.data[i,:])
         return ax
 
