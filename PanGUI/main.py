@@ -49,7 +49,10 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def gonext(self):
         for ax in self.fig.axes:
-            ax.clear()
+            ax.collections = []
+            ax.lines = []
+            ax.patches = []
+
         self.index = min(len(self.plotobject.data)-1, self.index+1)
         self.plotobject.plot(self.index, fig=self.fig)
         self.canvas.draw()
@@ -57,7 +60,9 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def goprev(self):
         for ax in self.fig.axes:
-            ax.clear()
+            ax.collections = []
+            ax.lines = []
+            ax.patches = []
         self.index = max(0, self.index-1)
         self.plotobject.plot(self.index, fig=self.fig)
         self.canvas.draw()
