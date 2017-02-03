@@ -10,7 +10,11 @@ class PlotObject():
     def plot(self,i,fig=None):
         if fig is None:
             fig = gcf()
-        ax = fig.add_subplot(111)
+        if len(fig.axes) < 1:
+            ax = fig.add_subplot(111)
+        else:
+            ax = fig.axes[0]
+            ax.clear()
         ax.plot(self.data[i,:])
         return ax
 
