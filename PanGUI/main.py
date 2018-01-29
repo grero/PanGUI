@@ -69,7 +69,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.currentIndex.setText(str(self.index))
 
 
-def create_window(window_class,args):
+def create_window(plot_object, window_class=Main):
     """
     Create a new window based on `window_class`. This works whether called from IPython terminal or as a script
     Based on: http://cyrille.rossant.net/making-pyqt4-pyside-and-ipython-work-together/
@@ -82,7 +82,7 @@ def create_window(window_class,args):
         app = QtGui.QApplication(sys.argv)
         app_created = True
     app.references = set()
-    window = window_class(args)
+    window = window_class(plot_object)
     app.references.add(window)
     window.show()
     if app_created:
