@@ -1,9 +1,9 @@
 import sys
 import os
-from PyQt4 import QtCore, QtGui
-from PyQt4.uic import loadUiType
+from PyQt5 import QtCore, QtGui
+from PyQt5.uic import loadUiType
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import (
+from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
