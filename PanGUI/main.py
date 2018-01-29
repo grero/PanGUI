@@ -12,6 +12,7 @@ guipath[-1] = "GUI.ui"
 guifile = os.sep.join(guipath)
 Ui_MainWindow, QMainWindow = loadUiType(guifile)
 
+
 class Main(QMainWindow, Ui_MainWindow):
     def __init__(self, plotobject):
         """
@@ -29,9 +30,8 @@ class Main(QMainWindow, Ui_MainWindow):
         fig1.set_facecolor((0.92, 0.92, 0.92))
         fig1.set_tight_layout(True)
         self.addmpl(fig1)
-        plotobject.plot(self.index,fig=self.fig)
+        plotobject.plot(self.index, fig=self.fig)
         self.setWindowTitle(plotobject.title)
-
 
     def addmpl(self, fig):
         self.fig = fig
