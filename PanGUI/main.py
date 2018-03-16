@@ -1,6 +1,6 @@
 import sys
 import os
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.uic import loadUiType
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import (
@@ -79,7 +79,7 @@ def create_window(plot_object, window_class=Main):
     app_created = False
     app = QtCore.QCoreApplication.instance()
     if app is None:
-        app = QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
         app_created = True
     app.references = set()
     window = window_class(plot_object)
