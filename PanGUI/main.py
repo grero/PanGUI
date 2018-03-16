@@ -23,6 +23,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.prevButton.clicked.connect(self.goprev)
         self.nextButton.clicked.connect(self.gonext)
+        self.currentIndex.editingFinished.connect(self.updateIndex)
         self.index = 0
         self.dirs = dirs
         self.plotfunc = plotfunc
@@ -72,6 +73,12 @@ class Main(QMainWindow, Ui_MainWindow):
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 
+    def updateIndex(self):
+        self.index = int(self.currentIndex.text())
+        self.index = min(max(self.index, 0), len(self.dirs)-1)
+        self.currentIndex.setText(str(self.index))  # Update the index shown
+        self.plotfunc(self.dirs[self.index], self.fig)
+        self.canvas.draw()
 
 def create_window(plotfunc, dirs, window_class=Main):
     """
