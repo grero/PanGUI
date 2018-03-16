@@ -14,7 +14,7 @@ Ui_MainWindow, QMainWindow = loadUiType(guifile)
 
 
 class Main(QMainWindow, Ui_MainWindow):
-    def __init__(self, plotobject):
+    def __init__(self, plotfunc, dirs):
         """
 
         :type plotobject: object
@@ -24,7 +24,8 @@ class Main(QMainWindow, Ui_MainWindow):
         self.prevButton.clicked.connect(self.goprev)
         self.nextButton.clicked.connect(self.gonext)
         self.index = 0
-        self.plotobject = plotobject
+        self.dirs = dirs
+        self.plotfunc = plotfunc
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
@@ -46,6 +47,9 @@ class Main(QMainWindow, Ui_MainWindow):
         self.actionZoom.triggered.connect(self.toolbar.zoom)
         self.actionReset_Zoom.triggered.connect(self.toolbar.home)
         self.actionPan.triggered.connect(self.toolbar.pan)
+        self.plotfunc(self.dirs[self.index], self.fig)
+        self.mplvl.addWidget(self.canvas)
+        self.canvas.draw()
 
     def gonext(self):
         for ax in self.fig.axes:
@@ -64,12 +68,12 @@ class Main(QMainWindow, Ui_MainWindow):
             ax.lines = []
             ax.patches = []
         self.index = max(0, self.index-1)
-        self.plotobject.plot(self.index, fig=self.fig)
+        self.plotfunc(self.dirs[self.index], self.fig)
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 
 
-def create_window(plot_object, window_class=Main):
+def create_window(plotfunc, dirs, window_class=Main):
     """
     Create a new window based on `window_class`. This works whether called from IPython terminal or as a script
     Based on: http://cyrille.rossant.net/making-pyqt4-pyside-and-ipython-work-together/
@@ -82,7 +86,7 @@ def create_window(plot_object, window_class=Main):
         app = QtWidgets.QApplication(sys.argv)
         app_created = True
     app.references = set()
-    window = window_class(plot_object)
+    window = window_class(plotfunc, dirs)
     app.references.add(window)
     window.show()
     if app_created:
