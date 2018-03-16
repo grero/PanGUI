@@ -32,18 +32,14 @@ class Main(QMainWindow, Ui_MainWindow):
         fig1.set_facecolor((0.92, 0.92, 0.92))
         fig1.set_tight_layout(True)
         self.addmpl(fig1)
-        plotobject.plot(self.index, fig=self.fig)
-        self.setWindowTitle(plotobject.title)
 
     def addmpl(self, fig):
         self.fig = fig
         self.canvas = FigureCanvas(fig)
-        self.mplvl.addWidget(self.canvas)
-        self.canvas.draw()
         self.toolbar = NavigationToolbar(self.canvas,
                                          self.mplwindow,
                                          coordinates=True)
-        self.toolbar.hide()
+        self.toolbar.show()
         self.mplvl.addWidget(self.toolbar)
         self.actionZoom.triggered.connect(self.toolbar.zoom)
         self.actionReset_Zoom.triggered.connect(self.toolbar.home)
@@ -58,8 +54,8 @@ class Main(QMainWindow, Ui_MainWindow):
             ax.lines = []
             ax.patches = []
 
-        self.index = min(len(self.plotobject.data)-1, self.index+1)
-        self.plotobject.plot(self.index, fig=self.fig)
+        self.index = min(len(self.dirs)-1, self.index+1)
+        self.plotfunc(self.dirs[self.index], self.fig)
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 
