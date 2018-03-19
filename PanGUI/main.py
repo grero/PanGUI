@@ -30,7 +30,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
-        fig1.set_tight_layout(True)
         self.addmpl(fig1)
 
     def addmpl(self, fig):
