@@ -1,10 +1,14 @@
-#Introduction
+Introduction
+------------
+PanGUI offers a simple way of panning through a sequence of plots.
 
-###Installation 
+Installation
+-----------
 
 pip install git+https://github.com/grero/PanGUI.git
 
-###Usage
+Usage
+------
 
 ```python
 import PanGUI
