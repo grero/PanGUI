@@ -75,6 +75,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.plotfunc(self.dirs[self.index], self.fig)
         self.canvas.draw()
 
+
 def create_window(plotfunc, dirs, window_class=Main):
     """
     Create a new window based on `window_class`. This works whether called from IPython terminal or as a script
