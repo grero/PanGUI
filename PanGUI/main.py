@@ -31,6 +31,7 @@ class Main(QMainWindow, Ui_MainWindow):
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
         self.addmpl(fig1)
+        self.plotfunc(self.dirs[self.index], self.fig)
 
     def addmpl(self, fig):
         self.fig = fig
@@ -43,7 +44,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.actionZoom.triggered.connect(self.toolbar.zoom)
         self.actionReset_Zoom.triggered.connect(self.toolbar.home)
         self.actionPan.triggered.connect(self.toolbar.pan)
-        self.plotfunc(self.dirs[self.index], self.fig)
         self.mplvl.addWidget(self.canvas)
         self.canvas.draw()
 
