@@ -6,6 +6,7 @@ Installation
 -----------
 
 pip install git+https://github.com/grero/PanGUI.git
+conda install --channel grero1980 pangui
 
 Usage
 ------
