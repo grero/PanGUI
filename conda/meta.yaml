@@ -8,15 +8,15 @@ source:
 
 requirements:
     host: python
-    run: 
+    run:
         - python
         - qt >=5.0.0
         - matplotlib
 
 test:
-    imports: 
+    imports:
 
-about: 
-    home:
+about:
+    home: https://github.com/grero/PanGUI
     license: MIT
     license_file: LICENSE
