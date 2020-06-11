@@ -22,6 +22,9 @@ class PlotObject():
             if self.ext == "mat":
                 dd = mio.loadmat(fname, squeeze_me=True)
 
+    def update_idx(self, i):
+        return max(0, min(i, self.data.shape[0]-1))
+
     def plot(self, i, fig=None):
         if fig is None:
             fig = gcf()
@@ -37,4 +40,4 @@ class PlotObject():
 def test():
     data = np.random.random((10, 1000))
     pp = PlotObject(data)
-    ppg = PanGUI.create_window(pp.plot, range(10))
+    ppg = PanGUI.create_window(pp)
