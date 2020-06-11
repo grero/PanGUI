@@ -1,0 +1,22 @@
+package:
+    name: pangui
+    version: "v0.1.0"
+
+source:
+    git_rev: v0.1.0
+    git_url: https://github.com/grero/PanGUI.git
+
+requirements:
+    host: python
+    run:
+        - python
+        - qt >=5.0.0
+        - matplotlib
+
+test:
+    imports:
+
+about:
+    home: https://github.com/grero/PanGUI
+    license: MIT
+    license_file: LICENSE

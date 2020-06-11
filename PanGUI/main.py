@@ -14,7 +14,7 @@ Ui_MainWindow, QMainWindow = loadUiType(guifile)
 
 
 class Main(QMainWindow, Ui_MainWindow):
-    def __init__(self, plotfunc, dirs):
+    def __init__(self, plotobj):
         """
 
         :type plotobject: object
@@ -25,13 +25,12 @@ class Main(QMainWindow, Ui_MainWindow):
         self.nextButton.clicked.connect(self.gonext)
         self.currentIndex.editingFinished.connect(self.updateIndex)
         self.index = 0
-        self.dirs = dirs
-        self.plotfunc = plotfunc
+        self.plotobj = plotobj
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
         self.addmpl(fig1)
-        self.plotfunc(self.dirs[self.index], self.fig)
+        self.plotobj.plot(self.index, self.fig)
 
     def addmpl(self, fig):
         self.fig = fig
@@ -53,8 +52,8 @@ class Main(QMainWindow, Ui_MainWindow):
             ax.lines = []
             ax.patches = []
 
-        self.index = min(len(self.dirs)-1, self.index+1)
-        self.plotfunc(self.dirs[self.index], self.fig)
+        self.index = self.plotobj.update_idx(self.index+1)
+        self.plotobj.plot(self.index, self.fig)
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 
@@ -63,20 +62,20 @@ class Main(QMainWindow, Ui_MainWindow):
             ax.collections = []
             ax.lines = []
             ax.patches = []
-        self.index = max(0, self.index-1)
-        self.plotfunc(self.dirs[self.index], self.fig)
+        self.index = self.plotobj.update_idx(self.index-1)
+        self.plotobj.plot(self.index, self.fig)
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 
     def updateIndex(self):
         self.index = int(self.currentIndex.text())
-        self.index = min(max(self.index, 0), len(self.dirs)-1)
+        self.index = self.plotobj.update_idx(self.index)
         self.currentIndex.setText(str(self.index))  # Update the index shown
-        self.plotfunc(self.dirs[self.index], self.fig)
+        self.plotobj.plot(self.index, self.fig)
         self.canvas.draw()
 
 
-def create_window(plotfunc, dirs, window_class=Main):
+def create_window(plotobj,  window_class=Main):
     """
     Create a new window based on `window_class`. This works whether called from IPython terminal or as a script
     Based on: http://cyrille.rossant.net/making-pyqt4-pyside-and-ipython-work-together/
@@ -89,7 +88,7 @@ def create_window(plotfunc, dirs, window_class=Main):
         app = QtWidgets.QApplication(sys.argv)
         app_created = True
     app.references = set()
-    window = window_class(plotfunc, dirs)
+    window = window_class(plotobj)
     app.references.add(window)
     window.show()
     if app_created:
