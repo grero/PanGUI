@@ -1,5 +1,6 @@
 import sys
 import os
+import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.uic import loadUiType
 from matplotlib.figure import Figure
@@ -14,7 +15,7 @@ Ui_MainWindow, QMainWindow = loadUiType(guifile)
 
 
 class Main(QMainWindow, Ui_MainWindow):
-    def __init__(self, plotobj):
+    def __init__(self, plotobjs, rows=None, cols=None):
         """
 
         :type plotobject: object
@@ -25,12 +26,19 @@ class Main(QMainWindow, Ui_MainWindow):
         self.nextButton.clicked.connect(self.gonext)
         self.currentIndex.editingFinished.connect(self.updateIndex)
         self.index = 0
-        self.plotobj = plotobj
+        self.plotobjs = plotobjs
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
         self.addmpl(fig1)
-        self.plotobj.plot(self.index, self.fig)
+        if cols is None:
+            cols = 1
+        if rows is None:
+            rows = np.ceil(len(plotobjs)/cols)
+
+        for (i, plotobj) in enumerate(plotobjs):
+            ax = fig1.add_subplot(rows, cols, i+1)
+            plotobj.plot(self.index, ax)
 
     def addmpl(self, fig):
         self.fig = fig
@@ -52,8 +60,10 @@ class Main(QMainWindow, Ui_MainWindow):
             ax.lines = []
             ax.patches = []
 
-        self.index = self.plotobj.update_idx(self.index+1)
-        self.plotobj.plot(self.index, self.fig)
+        self.index = min([plotobj.update_idx(self.index+1) for plotobj
+                          in self.plotobjs])
+        for (i, plotobj) in enumerate(self.plotobjs):
+            plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 
@@ -62,16 +72,20 @@ class Main(QMainWindow, Ui_MainWindow):
             ax.collections = []
             ax.lines = []
             ax.patches = []
-        self.index = self.plotobj.update_idx(self.index-1)
-        self.plotobj.plot(self.index, self.fig)
+        self.index = min([plotobj.update_idx(self.index-1) for plotobj
+                          in self.plotobjs])
+        for (i, plotobj) in enumerate(self.plotobjs):
+            plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
         self.currentIndex.setText(str(self.index))
 
     def updateIndex(self):
         self.index = int(self.currentIndex.text())
-        self.index = self.plotobj.update_idx(self.index)
+        self.index = min([plotobj.update_idx(self.index) for plotobj
+                          in self.plotobjs])
         self.currentIndex.setText(str(self.index))  # Update the index shown
-        self.plotobj.plot(self.index, self.fig)
+        for (i, plotobj) in enumerate(self.plotobjs):
+            plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
 
 
