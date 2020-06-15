@@ -40,3 +40,15 @@ class PlotObj()
 app = PanGUI.create_window(PlotObj())
 ```
 This will pop-up a plot window that plots the rows of `plotobj.data`. Clicking `prev` or `next` will step through the rows, while a specific row can be selected via the textfield.
+
+Multiple objects can be plotted at the same time, like this:
+
+```python
+po1 = PlotObj()
+po2 = PlotObj()
+po3 = PlotObj()
+po4 = PlotObj()
+app = PanGUI.create_window([po1, po2, po3, po4], cols=2)
+```
+
+This creates a 2x2 grid of the 4 plot objects.

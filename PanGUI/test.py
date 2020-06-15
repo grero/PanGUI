@@ -25,19 +25,24 @@ class PlotObject():
     def update_idx(self, i):
         return max(0, min(i, self.data.shape[0]-1))
 
-    def plot(self, i, fig=None):
-        if fig is None:
-            fig = gcf()
-        if len(fig.axes) < 1:
-            ax = fig.add_subplot(111)
-        else:
-            ax = fig.axes[0]
+    def plot(self, i, ax=None, overlay=False):
+        if ax is None:
+            ax = gca()
+        if not overlay:
             ax.clear()
         ax.plot(self.data[i, :])
         return ax
 
 
 def test():
-    data = np.random.random((10, 1000))
-    pp = PlotObject(data)
-    ppg = PanGUI.create_window(pp)
+    data1 = np.random.random((10, 1000))
+    data2 = np.random.random((10, 1000))
+    pp1 = PlotObject(data1)
+    pp2 = PlotObject(data2)
+    ppg = PanGUI.create_window([pp1, pp2])
+
+
+def test_single():
+    data1 = np.random.random((10, 1000))
+    pp1 = PlotObject(data1)
+    ppg = PanGUI.create_window(pp1)
