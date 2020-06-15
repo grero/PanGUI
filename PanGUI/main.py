@@ -26,7 +26,11 @@ class Main(QMainWindow, Ui_MainWindow):
         self.nextButton.clicked.connect(self.gonext)
         self.currentIndex.editingFinished.connect(self.updateIndex)
         self.index = 0
-        self.plotobjs = plotobjs
+        # hack to allow singleton argument here
+        if hasattr(plotobjs, '__getitem__'):
+            self.plotobjs = plotobjs
+        else:
+            self.plotobjs = [plotobjs]
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
@@ -34,9 +38,9 @@ class Main(QMainWindow, Ui_MainWindow):
         if cols is None:
             cols = 1
         if rows is None:
-            rows = np.ceil(len(plotobjs)/cols)
+            rows = np.ceil(len(self.plotobjs)/cols)
 
-        for (i, plotobj) in enumerate(plotobjs):
+        for (i, plotobj) in enumerate(self.plotobjs):
             ax = fig1.add_subplot(rows, cols, i+1)
             plotobj.plot(self.index, ax)
 
