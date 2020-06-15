@@ -77,7 +77,7 @@ class ViewWidget(QMainWindow):
         ax.legend()
 
     def save_spiketrains(self):
-        print "Saving spiketrains"
+        print("Saving spiketrains")
         qq = mio.loadmat(self.sortfile)
         template_idx = [int(filter(lambda x: x.isdigit(), v)) for v in self.picked_lines]
         sampling_rate = 30000.0
@@ -103,7 +103,7 @@ class ViewWidget(QMainWindow):
                     dd = "."
                 self.basedir = dd
                 self.sortfile = dd + os.path.sep + "hmmsort.mat"
-                print self.sortfile
+                print(self.sortfile)
                 if not os.path.isfile(self.sortfile):
                     continue
                 with h5py.File(f, "r") as ff:
@@ -144,9 +144,10 @@ def select_waveforms(fname="spike_templates.hdf5"):
             for f in files:
                 with h5py.File(f, "r") as ff:
                     waveforms = ff["spikeForms"][:]
-                    print waveforms.shape
+                    print(waveforms.shape)
                     pp = ff["p"][:]
                     plot_waveforms(waveforms, pp)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
