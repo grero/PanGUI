@@ -40,3 +40,9 @@ def test():
     pp1 = PlotObject(data1)
     pp2 = PlotObject(data2)
     ppg = PanGUI.create_window([pp1, pp2])
+
+
+def test_single():
+    data1 = np.random.random((10, 1000))
+    pp1 = PlotObject(data1)
+    ppg = PanGUI.create_window(pp1)
