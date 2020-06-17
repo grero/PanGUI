@@ -6,6 +6,7 @@ Installation
 -----------
 
 pip install git+https://github.com/grero/PanGUI.git
+
 conda install --channel grero1980 pangui
 
 Usage
@@ -21,23 +22,23 @@ To create a panning window, use the ```create_window``` function, supply a ```pl
 We can see how this works by examining the ```test``` function called above. First we generate some random data
 
 ```python
+import DataProcessingTools as DPT
 
-class PlotObj()
+class PlotObj(DPT.objects.DPObject):
     def __init__(self):
         self.data = np.random.random((10, 1000))
+        self.setidx = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1] 
+        self.dirs = ["session01/array01/channel001/cell01",
+                     "session01/array01/channel002/cell01"]
 
-    def plot(self, i, fig):
-          if len(fig.axes) < 1:
-              ax = fig.add_subplot(111)
-          else:
-              ax = fig.axes[0]
-          ax.clear()
-          ax.plot(data[i, :])
+    def plot(self, i=None, ax=None):
+        if ax is None:
+            ax = gca()
+        ax.clear()
+        ax.plot(self.data[i, :].T)
 
-    def update_idx(self, index):
-        return max(0, min(index, data.shape[0]-1))
 
-app = PanGUI.create_window(PlotObj())
+app = PanGUI.create_window(PlotObj(), indexer="trial")
 ```
 This will pop-up a plot window that plots the rows of `plotobj.data`. Clicking `prev` or `next` will step through the rows, while a specific row can be selected via the textfield.
 
