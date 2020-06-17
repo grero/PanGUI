@@ -15,7 +15,7 @@ Ui_MainWindow, QMainWindow = loadUiType(guifile)
 
 
 class Main(QMainWindow, Ui_MainWindow):
-    def __init__(self, plotobjs, rows=None, cols=None):
+    def __init__(self, plotobjs, rows=None, cols=None, indexer=None):
         """
 
         :type plotobject: object
@@ -40,9 +40,13 @@ class Main(QMainWindow, Ui_MainWindow):
         if rows is None:
             rows = np.ceil(len(self.plotobjs)/cols)
 
+        self.indexer = indexer
+        self.indexers = [plotobj.getindex(self.indexer) for plotobj
+                         in self.plotobjs]
+
         for (i, plotobj) in enumerate(self.plotobjs):
             ax = fig1.add_subplot(rows, cols, i+1)
-            plotobj.plot(self.index, ax)
+            plotobj.plot(self.indexers[i](self.index), ax)
 
     def addmpl(self, fig):
         self.fig = fig
@@ -58,38 +62,39 @@ class Main(QMainWindow, Ui_MainWindow):
         self.mplvl.addWidget(self.canvas)
         self.canvas.draw()
 
-    def gonext(self):
-        for ax in self.fig.axes:
-            ax.collections = []
-            ax.lines = []
-            ax.patches = []
+    def update_index(self, new_index):
+        index = self.index
+        for indexer in self.indexers:
+            if len(indexer(new_index)) > 0:
+                index = new_index
+            else:
+                index = self.index
 
-        self.index = min([plotobj.update_idx(self.index+1) for plotobj
-                          in self.plotobjs])
-        for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
-        self.canvas.draw()
+        self.index = index
+
+    def gonext(self):
+        self.update_index(self.index+1)
         self.currentIndex.setText(str(self.index))
+        for (i, plotobj) in enumerate(self.plotobjs):
+            plotobj.plot(self.indexers[i](self.index), self.fig.axes[i])
+        self.canvas.draw()
+        # I don't think should be necessary here, but the plot doesn't
+        # seem to update otherwise
+        self.repaint()
 
     def goprev(self):
-        for ax in self.fig.axes:
-            ax.collections = []
-            ax.lines = []
-            ax.patches = []
-        self.index = min([plotobj.update_idx(self.index-1) for plotobj
-                          in self.plotobjs])
-        for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
-        self.canvas.draw()
+        self.update_index(self.index-1)
         self.currentIndex.setText(str(self.index))
+        for (i, plotobj) in enumerate(self.plotobjs):
+            plotobj.plot(self.indexers[i](self.index), self.fig.axes[i])
+        self.canvas.draw()
+        self.repaint()
 
     def updateIndex(self):
-        self.index = int(self.currentIndex.text())
-        self.index = min([plotobj.update_idx(self.index) for plotobj
-                          in self.plotobjs])
+        self.update_index(int(self.currentIndex.text()))
         self.currentIndex.setText(str(self.index))  # Update the index shown
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
+            plotobj.plot(self.indexers[i](self.index), self.fig.axes[i])
         self.canvas.draw()
 
 
