@@ -28,7 +28,7 @@ class PlotObject(DPT.objects.DPObject):
             ax = gca()
         if not overlay:
             ax.clear()
-        ax.plot(self.data[i, :])
+        ax.plot(self.data[i, :].T)
         return ax
 
 
