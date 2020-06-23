@@ -1,2 +1,2 @@
 from .main import *
-from . import test
+from .test import test, test_single
