@@ -36,8 +36,11 @@ def test():
     data1 = np.random.random((10, 1000))
     data2 = np.random.random((10, 1000))
     pp1 = PlotObject(data1)
+    pp1.dirs = ["session01/array01/channel001/cell01"]
     pp2 = PlotObject(data2)
-    ppg = PanGUI.create_window([pp1, pp2])
+    pp1.dirs = ["session01/array01/channel001/cell02"]
+    ppg = PanGUI.create_window([pp1, pp2], indexer="trial")
+    return ppg
 
 
 def test_single():
