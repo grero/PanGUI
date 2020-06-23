@@ -1,4 +1,5 @@
 import PanGUI
+import DataProcessingTools as DPT
 from pylab import gcf
 import numpy as np
 import scipy
@@ -6,15 +7,12 @@ import scipy.io as mio
 import os
 
 
-class DPVObject():
-    def __init__(self):
-        self.data = []
-
-
-class PlotObject():
+class PlotObject(DPT.objects.DPObject):
     def __init__(self, data, title="Test windwow", name="", ext="mat"):
         self.data = data
         self.title = title
+        self.dirs = [""]
+        self.setidx = np.zeros((data.shape[0],), dtype=np.int)
 
     def load(self):
         fname = os.path.join(self.name, self.ext)
