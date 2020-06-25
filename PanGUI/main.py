@@ -86,7 +86,10 @@ class Main(QMainWindow, Ui_MainWindow):
     def setplotopts(self, q):
         if self.active_plotobj is not None:
             self.active_plotobj.plotopts[q.text()] = q.isChecked()
-            print(self.active_plotobj.plotopts[q.text()])
+            idx = self.plotobjs.index(self.active_plotobj)
+            self.active_plotobj.update_plotopts(self.fig.axes[idx])
+            self.canvas.draw()
+            self.repaint()
 
     def update_index(self, new_index):
         index = self.index
