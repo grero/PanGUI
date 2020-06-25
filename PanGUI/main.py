@@ -74,22 +74,37 @@ class Main(QMainWindow, Ui_MainWindow):
                 self.active_plotobj = plotobj
                 popupMenu = QtWidgets.QMenu(self)
                 for (k,v) in plotobj.plotopts.items():
+                    action = QtWidgets.QAction(k, self)
                     if isinstance(v, bool):
-                        action = QtWidgets.QAction(k, self)
                         action.setCheckable(True)
                         action.setChecked(v)
-                        popupMenu.addAction(action)
+                    elif isinstance(v, dict):
+                        pass
+                    else:
+                        action.setData(v)
+                    popupMenu.addAction(action)
                 cursor = QtGui.QCursor()
                 popupMenu.triggered[QtWidgets.QAction].connect(self.setplotopts)
                 popupMenu.popup(cursor.pos())
 
     def setplotopts(self, q):
         if self.active_plotobj is not None:
-            plotopts = {q.text(): q.isChecked()}
             idx = self.plotobjs.index(self.active_plotobj)
+            if q.isCheckable():
+                plotopts = {q.text(): q.isChecked()}
+            elif not q.isCheckable() and q.menu() == None:  # Text input
+                text, okPressed = QtWidgets.QInputDialog.getText(self,q.text(),"",
+                                                                 QtWidgets.QLineEdit.Normal,
+                                                                 str(q.data()))
+                if okPressed:
+                    plotopts = {q.text(): type(q.data())(text)}
+                else:
+                    plotopts = {}
+
             self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
             self.canvas.draw()
             self.repaint()
+
 
     def update_index(self, new_index):
         index = self.index
