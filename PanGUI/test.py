@@ -24,9 +24,11 @@ class PlotObject(DPT.objects.DPObject):
     def update_idx(self, i):
         return max(0, min(i, self.data.shape[0]-1))
 
-    def update_plotopts(self, ax=None):
+    def update_plotopts(self, plotopts, ax=None):
         if ax is None:
             ax = gca()
+        for (k,v) in plotopts.items():
+            self.plotopts[k] = v
 
         for l in ax.lines:
             l.set_visible(self.plotopts["show"])
