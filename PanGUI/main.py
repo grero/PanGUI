@@ -48,6 +48,8 @@ class Main(QMainWindow, Ui_MainWindow):
             ax = fig1.add_subplot(rows, cols, i+1)
             plotobj.plot(self.indexers[i](self.index), ax)
 
+        self.active_plotobj = None
+
     def addmpl(self, fig):
         self.fig = fig
         self.canvas = FigureCanvas(fig)
@@ -60,7 +62,31 @@ class Main(QMainWindow, Ui_MainWindow):
         self.actionReset_Zoom.triggered.connect(self.toolbar.home)
         self.actionPan.triggered.connect(self.toolbar.pan)
         self.mplvl.addWidget(self.canvas)
+        self.canvas.mpl_connect("button_press_event", self.onclick)
         self.canvas.draw()
+
+    def onclick(self, event):
+        if event.button == 3:  # right button
+            if event.inaxes is not None:
+                # figure out what is being plotted
+                axidx = self.fig.axes.index(event.inaxes)
+                plotobj = self.plotobjs[axidx]
+                self.active_plotobj = plotobj
+                popupMenu = QtWidgets.QMenu(self)
+                for (k,v) in plotobj.plotopts.items():
+                    if isinstance(v, bool):
+                        action = QtWidgets.QAction(k, self)
+                        action.setCheckable(True)
+                        action.setChecked(v)
+                        popupMenu.addAction(action)
+                cursor = QtGui.QCursor()
+                popupMenu.triggered[QtWidgets.QAction].connect(self.setplotopts)
+                popupMenu.popup(cursor.pos())
+
+    def setplotopts(self, q):
+        if self.active_plotobj is not None:
+            self.active_plotobj.plotopts[q.text()] = q.isChecked()
+            print(self.active_plotobj.plotopts[q.text()])
 
     def update_index(self, new_index):
         index = self.index
