@@ -24,6 +24,13 @@ class PlotObject(DPT.objects.DPObject):
     def update_idx(self, i):
         return max(0, min(i, self.data.shape[0]-1))
 
+    def update_plotopts(self, ax=None):
+        if ax is None:
+            ax = gca()
+
+        for l in ax.lines:
+            l.set_visible(self.plotopts["show"])
+
     def plot(self, i, ax=None, overlay=False):
         if ax is None:
             ax = gca()
