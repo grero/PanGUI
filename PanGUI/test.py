@@ -12,6 +12,7 @@ class PlotObject(DPT.objects.DPObject):
         self.data = data
         self.title = title
         self.dirs = [""]
+        self.plotopts = {"show": True}
         self.setidx = np.zeros((data.shape[0],), dtype=np.int)
 
     def load(self):
@@ -28,7 +29,8 @@ class PlotObject(DPT.objects.DPObject):
             ax = gca()
         if not overlay:
             ax.clear()
-        ax.plot(self.data[i, :].T)
+        if self.plotopts["show"]:
+            ax.plot(self.data[i, :].T)
         return ax
 
 
