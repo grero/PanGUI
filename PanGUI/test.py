@@ -1,6 +1,6 @@
 import PanGUI
 import DataProcessingTools as DPT
-from pylab import gcf
+from pylab import gcf, gca
 import numpy as np
 import scipy
 import scipy.io as mio
@@ -12,8 +12,9 @@ class PlotObject(DPT.objects.DPObject):
         self.data = data
         self.title = title
         self.dirs = [""]
-        self.plotopts = {"show": True}
+        self.plotopts = {"show": True, "factor": 1.0}
         self.setidx = np.zeros((data.shape[0],), dtype=np.int)
+        self.current_idx = None
 
     def load(self):
         fname = os.path.join(self.name, self.ext)
@@ -27,19 +28,26 @@ class PlotObject(DPT.objects.DPObject):
     def update_plotopts(self, plotopts, ax=None):
         if ax is None:
             ax = gca()
+        replot = False
         for (k,v) in plotopts.items():
-            self.plotopts[k] = v
+            if v != self.plotopts[k]:
+                self.plotopts[k] = v
+                replot = True
 
         for l in ax.lines:
             l.set_visible(self.plotopts["show"])
+        if replot:
+            self.plot(self.current_idx, ax=ax)
 
     def plot(self, i, ax=None, overlay=False):
+        self.current_idx = i
         if ax is None:
             ax = gca()
         if not overlay:
             ax.clear()
         if self.plotopts["show"]:
-            ax.plot(self.data[i, :].T)
+            f = self.plotopts["factor"]
+            ax.plot(f*self.data[i, :].T)
         return ax
 
 
