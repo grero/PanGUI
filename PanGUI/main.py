@@ -73,33 +73,56 @@ class Main(QMainWindow, Ui_MainWindow):
                 plotobj = self.plotobjs[axidx]
                 self.active_plotobj = plotobj
                 popupMenu = QtWidgets.QMenu(self)
-                for (k,v) in plotobj.plotopts.items():
-                    action = QtWidgets.QAction(k, self)
-                    if isinstance(v, bool):
-                        action.setCheckable(True)
-                        action.setChecked(v)
-                    elif isinstance(v, dict):
-                        pass
-                    else:
-                        action.setData(v)
-                    popupMenu.addAction(action)
+                self.create_menu(plotobj.plotopts, popupMenu)
                 cursor = QtGui.QCursor()
                 popupMenu.triggered[QtWidgets.QAction].connect(self.setplotopts)
                 popupMenu.popup(cursor.pos())
+
+    def create_menu(self, q, menu=None, cpath=""):
+        if menu is None:
+            popupMenu = QtWidgets.QMenu(self)
+        else:
+            popupMenu = menu
+
+        for (k, v) in q.items():
+            if isinstance(v, bool):
+                action = QtWidgets.QAction(k, self)
+                action.setCheckable(True)
+                action.setChecked(v)
+                action.setData({"path": "_".join((cpath, menu.title()))})
+                menu.addAction(action)
+            elif isinstance(v, dict):
+                subMenu = menu.addMenu(k)
+                if cpath != "":
+                    qpath = "_".join((cpath, k))
+                else:
+                    qpath = k
+                self.create_menu(v, subMenu, qpath)
+            else:
+                action = QtWidgets.QAction(k, self)
+                action.setData({"value": v, "path": cpath})
+                menu.addAction(action)
 
     def setplotopts(self, q):
         if self.active_plotobj is not None:
             idx = self.plotobjs.index(self.active_plotobj)
             if q.isCheckable():
                 plotopts = {q.text(): q.isChecked()}
-            elif not q.isCheckable() and q.menu() == None:  # Text input
+            elif not q.isCheckable() and q.menu() is None:  # Text input
                 text, okPressed = QtWidgets.QInputDialog.getText(self,q.text(),"",
                                                                  QtWidgets.QLineEdit.Normal,
-                                                                 str(q.data()))
+                                                                 str(q.data()["value"]))
+                plotopts = {}
                 if okPressed:
-                    plotopts = {q.text(): type(q.data())(text)}
-                else:
-                    plotopts = {}
+                    # unwind the path
+                    cpath = q.data()["path"].split("_")
+                    v = plotopts
+                    for k in cpath:
+                       aa = {}
+                       v[k] = aa
+                       v = v[k]
+
+                    v[q.text()] = type(q.data()["value"])(text)
 
             self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
             self.canvas.draw()
