@@ -12,7 +12,8 @@ class PlotObject(DPT.objects.DPObject):
         self.data = data
         self.title = title
         self.dirs = [""]
-        self.plotopts = {"show": True, "factor": 1.0}
+        self.plotopts = {"show": True, "factor": 1.0,
+                         "seeds": {"seed1": 1.0, "seed2": 2.0}}
         self.setidx = np.zeros((data.shape[0],), dtype=np.int)
         self.current_idx = None
 
@@ -25,14 +26,20 @@ class PlotObject(DPT.objects.DPObject):
     def update_idx(self, i):
         return max(0, min(i, self.data.shape[0]-1))
 
-    def update_plotopts(self, plotopts, ax=None):
+    def update_plotopts(self, plotopts, ax=None, splotopts=None):
+        if splotopts is None:
+            splotopts = self.plotopts
+
         if ax is None:
             ax = gca()
         replot = False
-        for (k,v) in plotopts.items():
-            if v != self.plotopts[k]:
-                self.plotopts[k] = v
-                replot = True
+        for (k, v) in plotopts.items():
+            if isinstance(v, dict):
+                self.update_plotopts(v, ax, self.plotopts[k])
+            else:
+                if v != splotopts[k]:
+                    splotopts[k] = v
+                    replot = True
 
         for l in ax.lines:
             l.set_visible(self.plotopts["show"])
@@ -48,6 +55,8 @@ class PlotObject(DPT.objects.DPObject):
         if self.plotopts["show"]:
             f = self.plotopts["factor"]
             ax.plot(f*self.data[i, :].T)
+            ax.axvline(self.plotopts["seeds"]["seed1"])
+            ax.axvline(self.plotopts["seeds"]["seed2"])
         return ax
 
 
