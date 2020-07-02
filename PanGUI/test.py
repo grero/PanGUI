@@ -26,26 +26,6 @@ class PlotObject(DPT.objects.DPObject):
     def update_idx(self, i):
         return max(0, min(i, self.data.shape[0]-1))
 
-    def update_plotopts(self, plotopts, ax=None, splotopts=None):
-        if splotopts is None:
-            splotopts = self.plotopts
-
-        if ax is None:
-            ax = gca()
-        replot = False
-        for (k, v) in plotopts.items():
-            if isinstance(v, dict):
-                self.update_plotopts(v, ax, self.plotopts[k])
-            else:
-                if v != splotopts[k]:
-                    splotopts[k] = v
-                    replot = True
-
-        for l in ax.lines:
-            l.set_visible(self.plotopts["show"])
-        if replot:
-            self.plot(self.current_idx, ax=ax)
-
     def plot(self, i, ax=None, overlay=False):
         self.current_idx = i
         if ax is None:
