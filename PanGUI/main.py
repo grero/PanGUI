@@ -115,15 +115,16 @@ class Main(QMainWindow, Ui_MainWindow):
                 plotopts = {}
                 if okPressed:
                     # unwind the path
-                    cpath = q.data()["path"].split("_")
+                    qpath = q.data()["path"]
                     v = plotopts
-                    for k in cpath:
-                       aa = {}
-                       v[k] = aa
-                       v = v[k]
+                    if qpath:
+                        cpath = qpath.split("_")
+                        for k in cpath:
+                           aa = {}
+                           v[k] = aa
+                           v = v[k]
 
                     v[q.text()] = type(q.data()["value"])(text)
-
             self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
             self.canvas.draw()
             self.repaint()
