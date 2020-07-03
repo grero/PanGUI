@@ -34,6 +34,16 @@ class Main(QMainWindow, Ui_MainWindow):
             self.plotobjs = plotobjs
         else:
             self.plotobjs = [plotobjs]
+
+        _levels = []
+        for obj in self.plotobjs:
+            for l in obj.getlevels():
+                if l not in _levels:
+                    _levels.append(l)
+
+        self.levelSelection.addItems(_levels)
+        self.levelSelection.currentIndexChanged.connect(self.update_level)
+
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
@@ -77,6 +87,11 @@ class Main(QMainWindow, Ui_MainWindow):
         self.mplvl.addWidget(self.canvas)
         self.canvas.mpl_connect("button_press_event", self.onclick)
         self.canvas.draw()
+
+    def update_level(self, lidx):
+        level = self.levelSelection.currentText()
+        for obj in self.plotobjs:
+            obj.update_index(level)
 
     def onclick(self, event):
         if event.button == 3:  # right button
