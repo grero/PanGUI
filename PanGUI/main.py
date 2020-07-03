@@ -40,13 +40,9 @@ class Main(QMainWindow, Ui_MainWindow):
         if rows is None:
             rows = np.ceil(len(self.plotobjs)/cols)
 
-        self.indexer = indexer
-        self.indexers = [plotobj.getindex(self.indexer) for plotobj
-                         in self.plotobjs]
-
         for (i, plotobj) in enumerate(self.plotobjs):
             ax = fig1.add_subplot(rows, cols, i+1)
-            plotobj.plot(self.indexers[i](self.index), ax)
+            plotobj.plot(self.index, ax)
 
         self.active_plotobj = None
 
@@ -129,11 +125,10 @@ class Main(QMainWindow, Ui_MainWindow):
             self.canvas.draw()
             self.repaint()
 
-
     def update_index(self, new_index):
         index = self.index
-        for indexer in self.indexers:
-            if len(indexer(new_index)) > 0:
+        for plotobj in self.plotobjs:
+            if len(plotobj.indexer(new_index)) > 0:
                 index = new_index
             else:
                 index = self.index
@@ -144,7 +139,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.update_index(self.index+1)
         self.currentIndex.setText(str(self.index))
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.indexers[i](self.index), self.fig.axes[i])
+            plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
         # I don't think should be necessary here, but the plot doesn't
         # seem to update otherwise
@@ -154,7 +149,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.update_index(self.index-1)
         self.currentIndex.setText(str(self.index))
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.indexers[i](self.index), self.fig.axes[i])
+            plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
         self.repaint()
 
@@ -162,7 +157,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.update_index(int(self.currentIndex.text()))
         self.currentIndex.setText(str(self.index))  # Update the index shown
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.indexers[i](self.index), self.fig.axes[i])
+            plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
 
 
