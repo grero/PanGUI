@@ -1,6 +1,7 @@
 import sys
 import os
 import numpy as np
+import DataProcessingTools as DPT
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.uic import loadUiType
 from matplotlib.figure import Figure
