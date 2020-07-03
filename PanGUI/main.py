@@ -72,6 +72,7 @@ class Main(QMainWindow, Ui_MainWindow):
             plotobj.plot(self.index, ax)
 
         self.active_plotobj = None
+        self.levelSelection.setCurrentIndex(_levels.index(self.plotobjs[0].level))
 
     def addmpl(self, fig):
         self.fig = fig
@@ -92,6 +93,9 @@ class Main(QMainWindow, Ui_MainWindow):
         level = self.levelSelection.currentText()
         for obj in self.plotobjs:
             obj.update_index(level)
+        # make sure the old index is still valid
+        self.currentIndex.setText("0")
+        self.updateIndex()
 
     def onclick(self, event):
         if event.button == 3:  # right button
