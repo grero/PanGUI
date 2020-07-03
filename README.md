@@ -55,3 +55,12 @@ app = PanGUI.create_window([po1, po2, po3, po4], cols=2)
 ```
 
 This creates a 2x2 grid of the 4 plot objects.
+
+Axes can be linked using the `linkxaxes` and `linkyaxes` keywords.
+
+```python
+app = PanGUI.create_window([po1, po2, po3, po4], cols=2,
+                           linkxaxes=[0, 0, 2, 2))
+```
+This will link the x-axes of the first two objects together, and the x-axes of the second two objects. 
+`linkxaxes` and `linkyaxes` should contain the index of the objects to which the axis should be linked. Specifying its own inde, like for the 1st and 3rd object in the above example, is a non-oeration, meaning they specify no link. In other words, the default state, with no axes linking, in the abovce example is `linkxaxes = [0,1,2,3]`.

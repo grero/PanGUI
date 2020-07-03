@@ -44,14 +44,18 @@ class PlotObject(DPObject):
         return ax
 
 
-def test():
+def test(linkaxes=True):
     data1 = np.random.random((10, 1000))
     data2 = np.random.random((10, 1000))
     pp1 = PlotObject(data1, normpath=False)
     pp1.dirs = ["session01/array01/channel001/cell01"]
     pp2 = PlotObject(data2, normpath=False)
     pp1.dirs = ["session01/array01/channel001/cell02"]
-    ppg = PanGUI.create_window([pp1, pp2])
+    if linkaxes:
+        ppg = PanGUI.create_window([pp1, pp2], linkxaxes=[0, 0],
+                                   linkyaxes=[0, 0])
+    else:
+        ppg = PanGUI.create_window([pp1, pp2])
     return ppg
 
 
