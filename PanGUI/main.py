@@ -15,7 +15,8 @@ Ui_MainWindow, QMainWindow = loadUiType(guifile)
 
 
 class Main(QMainWindow, Ui_MainWindow):
-    def __init__(self, plotobjs, rows=None, cols=None, indexer=None):
+    def __init__(self, plotobjs, rows=None, cols=None, indexer=None,
+                 linkxaxes=None, linkyaxes=None):
         """
 
         :type plotobject: object
@@ -40,6 +41,8 @@ class Main(QMainWindow, Ui_MainWindow):
         if rows is None:
             rows = np.ceil(len(self.plotobjs)/cols)
 
+        if linkaxes is None:
+            pass
         for (i, plotobj) in enumerate(self.plotobjs):
             ax = fig1.add_subplot(rows, cols, i+1)
             plotobj.plot(self.index, ax)
