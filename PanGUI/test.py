@@ -10,6 +10,7 @@ import os
 
 class PlotObject(DPObject):
     argsList = ["data", ("title", "test")]
+    level = "trial"
 
     def __init__(self,*args, **kwargs):
         DPObject.__init__(self, *args ,**kwargs)
@@ -21,6 +22,9 @@ class PlotObject(DPObject):
         self.indexer = self.getindex("trial")
         self.setidx = np.zeros((self.data.shape[0],), dtype=np.int)
         self.current_idx = None
+
+    def getlevels(self):
+        return ["trial"]
 
     def load(self):
         fname = os.path.join(self.name, self.ext)
