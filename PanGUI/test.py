@@ -1,5 +1,6 @@
 import PanGUI
 import DataProcessingTools as DPT
+from DataProcessingTools.objects import DPObject
 from pylab import gcf, gca
 import numpy as np
 import scipy
@@ -7,14 +8,17 @@ import scipy.io as mio
 import os
 
 
-class PlotObject(DPT.objects.DPObject):
-    def __init__(self, data, title="Test windwow", name="", ext="mat"):
-        self.data = data
-        self.title = title
-        self.dirs = [""]
+class PlotObject(DPObject):
+    argsList = ["data", ("title", "test")]
+
+    def __init__(self,*args, **kwargs):
+        DPObject.__init__(self, *args ,**kwargs)
+        self.data = self.args["data"]
+        self.title = self.args["title"]
         self.plotopts = {"show": True, "factor": 1.0,
                          "seeds": {"seed1": 1.0, "seed2": 2.0}}
-        self.setidx = np.zeros((data.shape[0],), dtype=np.int)
+        self.indexer = self.getindex("trial")
+        self.setidx = np.zeros((self.data.shape[0],), dtype=np.int)
         self.current_idx = None
 
     def load(self):
@@ -43,11 +47,11 @@ class PlotObject(DPT.objects.DPObject):
 def test():
     data1 = np.random.random((10, 1000))
     data2 = np.random.random((10, 1000))
-    pp1 = PlotObject(data1)
+    pp1 = PlotObject(data1, normpath=False)
     pp1.dirs = ["session01/array01/channel001/cell01"]
-    pp2 = PlotObject(data2)
+    pp2 = PlotObject(data2, normpath=False)
     pp1.dirs = ["session01/array01/channel001/cell02"]
-    ppg = PanGUI.create_window([pp1, pp2], indexer="trial")
+    ppg = PanGUI.create_window([pp1, pp2])
     return ppg
 
 
