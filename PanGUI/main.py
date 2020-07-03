@@ -94,6 +94,15 @@ class Main(QMainWindow, Ui_MainWindow):
                 else:
                     qpath = k
                 self.create_menu(v, subMenu, qpath)
+            elif isinstance(v, DPT.objects.ExclusiveOptions):
+                for (ii, oo) in enumerate(v.options):
+                    action = QtWidgets.QAction(oo, self)
+                    action.setCheckable(True)
+                    action.setData({"path": "_".join((cpath, menu.title())),
+                                    "links": v.options})
+                    if v.checked == ii:
+                        action.setChecked(True)
+                    menu.addAction(action)
             else:
                 action = QtWidgets.QAction(k, self)
                 action.setData({"value": v, "path": cpath})
@@ -104,6 +113,11 @@ class Main(QMainWindow, Ui_MainWindow):
             idx = self.plotobjs.index(self.active_plotobj)
             if q.isCheckable():
                 plotopts = {q.text(): q.isChecked()}
+                if q.isChecked() and "links" in q.data().keys():
+                    for ll in q.data()["links"]:
+                        if ll != q.text():
+                            plotopts[ll] = False
+
             elif not q.isCheckable() and q.menu() is None:  # Text input
                 text, okPressed = QtWidgets.QInputDialog.getText(self,q.text(),"",
                                                                  QtWidgets.QLineEdit.Normal,
