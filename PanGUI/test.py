@@ -16,7 +16,8 @@ class PlotObject(DPObject):
         self.data = self.args["data"]
         self.title = self.args["title"]
         self.plotopts = {"show": True, "factor": 1.0,
-                         "seeds": {"seed1": 1.0, "seed2": 2.0}}
+                         "seeds": {"seed1": 1.0, "seed2": 2.0},
+                         "color": DPT.objects.ExclusiveOptions(["red","green"], 0)}
         self.indexer = self.getindex("trial")
         self.setidx = np.zeros((self.data.shape[0],), dtype=np.int)
         self.current_idx = None
@@ -38,7 +39,8 @@ class PlotObject(DPObject):
             ax.clear()
         if self.plotopts["show"]:
             f = self.plotopts["factor"]
-            ax.plot(f*self.data[i, :].T)
+            pcolor = self.plotopts["color"].selected()
+            ax.plot(f*self.data[i, :].T, color=pcolor)
             ax.axvline(self.plotopts["seeds"]["seed1"])
             ax.axvline(self.plotopts["seeds"]["seed2"])
         return ax
