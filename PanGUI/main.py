@@ -9,6 +9,7 @@ from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
+
 guipath = __file__.split(os.sep)
 guipath[-1] = "GUI.ui"
 guifile = os.sep.join(guipath)
