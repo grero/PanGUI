@@ -182,24 +182,45 @@ class Main(QMainWindow, Ui_MainWindow):
         if dialog is None:
             dialog = QtWidgets.QDialog()
             dialog.setWindowTitle("Set plot options")
-        for (k, v) in plotopts.items():
-            if isinstance(v, dict):
-                group = QtWidgets.QGroupBox(k, dialog)
-                self.create_dialog(q, v, group)
-            elif isinstance(v, bool):
-                aa = QtWidgets.QCheckBox("k", dialog)
-                aa.setChecked(v)
-            else:
-                aa = QtWidgets.QLineEdit(str(v), dialog)
+            layout = QtWidgets.QVBoxLayout(dialog)
+            self.create_dialog(q, plotopts, layout)
 
-        if isinstance(dialog, QtWidgets.QDialog): 
-            buttonOK = QtWidgets.QPushButton("OK", dialog)
+            buttonOK = QtWidgets.QPushButton("OK")
+            layout.addWidget(buttonOK)
             buttonOK.clicked.connect(dialog.accept)
-            buttonCancel = QtWidgets.QPushButton("Cancel", dialog)
+            buttonCancel = QtWidgets.QPushButton("Cancel")
+            layout.addWidget(buttonCancel)
+
             buttonCancel.clicked.connect(dialog.reject)
             dialog.setModal(True)
             result = dialog.exec_()
             print(result)
+        else:
+            for (k, v) in plotopts.items():
+                if isinstance(v, dict):
+                    group = QtWidgets.QGroupBox(k)
+                    layout = QtWidgets.QVBoxLayout(group)
+                    dialog.addWidget(group)
+                    self.create_dialog(q, v, layout)
+                elif isinstance(v, bool):
+                    aa = QtWidgets.QCheckBox(k)
+                    dialog.addWidget(aa)
+                    aa.setChecked(v)
+                elif isinstance(v, DPT.objects.ExclusiveOptions):
+                    layout = QtWidgets.QVBoxLayout()
+                    for (ii, oo) in enumerate(v.options):
+                        rr = QtWidgets.QRadioButton(oo)
+                        if ii == v.checked: 
+                            rr.setChecked(True)
+                        else:
+                            rr.setChecked(False)
+                        layout.addWidget(rr)
+                    group = QtWidgets.QGroupBox(k)
+                    group.setLayout(layout)
+                else:
+                    aa = QtWidgets.QLineEdit(str(v))
+                    dialog.addWidget(aa)
+
 
 
     def update_index(self, new_index):
