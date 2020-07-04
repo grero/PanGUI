@@ -160,6 +160,34 @@ class Main(QMainWindow, Ui_MainWindow):
             self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
             self.canvas.draw()
             self.repaint()
+    
+    def create_dialog(self, plotopts, dialog=None):
+        """
+        Dynamically create a dialog based on the contentents
+        of the dictionary `plotopts`.
+        """
+        if dialog is None:
+            dialog = QtWidgets.QDialog()
+            dialog.setWindowTitle("Set plot options")
+        for (k, v) in plotopts.items(): 
+            if isinstance(v, dict):
+                group = QtWidgets.QGroupBox(self, k)
+                create_dialog(v, group)
+            elif isinstance(v, bool):
+                aa = QtWidgets.QCheckBox("k")
+                aa.setChecked(v)
+                dialog.addWidget(aa)
+            else:
+                aa = QtWidgets.QLineEdit(self, v)
+
+        buttonOK = QtWidgets.QButton(self, "OK")
+        buttonOK.clicked.connect(dialog.accept)
+        dialog.addWidget(buttonOK)
+        buttonCancel = QtWidgets.QButton(self, "Cancel")
+        buttonCancel.clicked.connect(dialg.reject)
+        dialog.addWidget(buttonCancel)
+        dialog.setModal(True)
+        dialog.exec()
 
     def update_index(self, new_index):
         index = self.index
