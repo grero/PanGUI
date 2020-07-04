@@ -187,7 +187,9 @@ class Main(QMainWindow, Ui_MainWindow):
         buttonCancel.clicked.connect(dialg.reject)
         dialog.addWidget(buttonCancel)
         dialog.setModal(True)
-        dialog.exec()
+        result = dialog.exec_()
+        print(result)
+
 
     def update_index(self, new_index):
         index = self.index
