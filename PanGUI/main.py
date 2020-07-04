@@ -87,8 +87,12 @@ class Main(QMainWindow, Ui_MainWindow):
                 self.active_plotobj = plotobj
                 popupMenu = QtWidgets.QMenu(self)
                 self.create_menu(plotobj.plotopts, popupMenu)
+                # add popup dialog as the last optoon
+                daction = QtWidgets.QAction("Set all...", self)
+                popupMenu.addAction(daction)
                 cursor = QtGui.QCursor()
                 popupMenu.triggered[QtWidgets.QAction].connect(self.setplotopts)
+                daction.triggered.connect(self.create_dialog)
                 popupMenu.popup(cursor.pos())
 
     def create_menu(self, q, menu=None, cpath=""):
@@ -132,6 +136,10 @@ class Main(QMainWindow, Ui_MainWindow):
                 menu.addAction(action)
 
     def setplotopts(self, q):
+        # Kind of hackish, but needed since setplotopts currently gets called for any 
+        # menu selection
+        if q.text() == "Set all...":
+            return None
         if self.active_plotobj is not None:
             idx = self.plotobjs.index(self.active_plotobj)
 
@@ -161,34 +169,37 @@ class Main(QMainWindow, Ui_MainWindow):
             self.canvas.draw()
             self.repaint()
     
-    def create_dialog(self, plotopts, dialog=None):
+    def create_dialog(self, q, plotopts=None, dialog=None):
         """
         Dynamically create a dialog based on the contentents
         of the dictionary `plotopts`.
         """
+        if plotopts is None:
+            if self.active_plotobj is not None:
+                plotopts = self.active_plotobj.plotopts
+        if plotopts is None:
+            return
         if dialog is None:
             dialog = QtWidgets.QDialog()
             dialog.setWindowTitle("Set plot options")
-        for (k, v) in plotopts.items(): 
+        for (k, v) in plotopts.items():
             if isinstance(v, dict):
-                group = QtWidgets.QGroupBox(self, k)
-                create_dialog(v, group)
+                group = QtWidgets.QGroupBox(k, dialog)
+                self.create_dialog(q, v, group)
             elif isinstance(v, bool):
-                aa = QtWidgets.QCheckBox("k")
+                aa = QtWidgets.QCheckBox("k", dialog)
                 aa.setChecked(v)
-                dialog.addWidget(aa)
             else:
-                aa = QtWidgets.QLineEdit(self, v)
+                aa = QtWidgets.QLineEdit(str(v), dialog)
 
-        buttonOK = QtWidgets.QButton(self, "OK")
-        buttonOK.clicked.connect(dialog.accept)
-        dialog.addWidget(buttonOK)
-        buttonCancel = QtWidgets.QButton(self, "Cancel")
-        buttonCancel.clicked.connect(dialg.reject)
-        dialog.addWidget(buttonCancel)
-        dialog.setModal(True)
-        result = dialog.exec_()
-        print(result)
+        if isinstance(dialog, QtWidgets.QDialog): 
+            buttonOK = QtWidgets.QPushButton("OK", dialog)
+            buttonOK.clicked.connect(dialog.accept)
+            buttonCancel = QtWidgets.QPushButton("Cancel", dialog)
+            buttonCancel.clicked.connect(dialog.reject)
+            dialog.setModal(True)
+            result = dialog.exec_()
+            print(result)
 
 
     def update_index(self, new_index):
