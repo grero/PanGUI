@@ -223,6 +223,7 @@ class Main(QMainWindow, Ui_MainWindow):
                         layout.addWidget(rr)
                     group = QtWidgets.QGroupBox(k)
                     group.setLayout(layout)
+                    dialog.addWidget(group)
                 else:
                     layout = QtWidgets.QHBoxLayout()
                     label = QtWidgets.QLabel(k)
