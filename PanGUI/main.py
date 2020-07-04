@@ -194,7 +194,8 @@ class Main(QMainWindow, Ui_MainWindow):
             buttonCancel.clicked.connect(dialog.reject)
             dialog.setModal(True)
             result = dialog.exec_()
-            print(result)
+            print(plotopts)
+            # TODO: Actually population the dictionary
         else:
             for (k, v) in plotopts.items():
                 if isinstance(v, dict):
@@ -206,6 +207,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     aa = QtWidgets.QCheckBox(k)
                     dialog.addWidget(aa)
                     aa.setChecked(v)
+                    aa.stateChanged.connect(lambda state, k=k: plotopts.__setitem__(k, state == QtCore.Qt.Checked))
                 elif isinstance(v, DPT.objects.ExclusiveOptions):
                     layout = QtWidgets.QVBoxLayout()
                     for (ii, oo) in enumerate(v.options):
