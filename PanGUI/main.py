@@ -189,6 +189,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def gonext(self):
         self.update_index(self.index+1)
         self.currentIndex.setText(str(self.index))
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
@@ -199,6 +201,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def goprev(self):
         self.update_index(self.index-1)
         self.currentIndex.setText(str(self.index))
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
@@ -207,6 +211,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def updateIndex(self):
         self.update_index(int(self.currentIndex.text()))
         self.currentIndex.setText(str(self.index))  # Update the index shown
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
