@@ -216,6 +216,10 @@ class Main(QMainWindow, Ui_MainWindow):
                             rr.setChecked(True)
                         else:
                             rr.setChecked(False)
+
+                        rr.toggled.connect(lambda state, oo=oo, v=v: state and v.select(oo) and print(oo))
+
+
                         layout.addWidget(rr)
                     group = QtWidgets.QGroupBox(k)
                     group.setLayout(layout)
