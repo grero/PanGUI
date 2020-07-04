@@ -62,6 +62,7 @@ class Main(QMainWindow, Ui_MainWindow):
             plotobj.plot(self.index, ax)
 
         self.active_plotobj = None
+        self.active_axis = None
 
     def addmpl(self, fig):
         self.fig = fig
@@ -85,6 +86,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 axidx = self.fig.axes.index(event.inaxes)
                 plotobj = self.plotobjs[axidx]
                 self.active_plotobj = plotobj
+                self.active_axis = event.inaxes
                 popupMenu = QtWidgets.QMenu(self)
                 self.create_menu(plotobj.plotopts, popupMenu)
                 # add popup dialog as the last optoon
@@ -168,7 +170,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
             self.canvas.draw()
             self.repaint()
-    
+
     def create_dialog(self, q, plotopts=None, dialog=None):
         """
         Dynamically create a dialog based on the contentents
@@ -176,7 +178,7 @@ class Main(QMainWindow, Ui_MainWindow):
         """
         if plotopts is None:
             if self.active_plotobj is not None:
-                plotopts = self.active_plotobj.plotopts
+                plotopts = self.active_plotobj.plotopts.copy()
         if plotopts is None:
             return
         if dialog is None:
@@ -184,18 +186,22 @@ class Main(QMainWindow, Ui_MainWindow):
             dialog.setWindowTitle("Set plot options")
             layout = QtWidgets.QVBoxLayout(dialog)
             self.create_dialog(q, plotopts, layout)
-
+            blayout = QtWidgets.QHBoxLayout()
             buttonOK = QtWidgets.QPushButton("OK")
-            layout.addWidget(buttonOK)
+            blayout.addWidget(buttonOK)
             buttonOK.clicked.connect(dialog.accept)
             buttonCancel = QtWidgets.QPushButton("Cancel")
-            layout.addWidget(buttonCancel)
+            blayout.addWidget(buttonCancel)
+            layout.addLayout(blayout)
 
             buttonCancel.clicked.connect(dialog.reject)
             dialog.setModal(True)
             result = dialog.exec_()
-            print(plotopts)
-            # TODO: Actually population the dictionary
+            if result:
+                self.active_plotobj.plotopts = plotopts
+                self.active_plotobj.plot(self.index, ax=self.active_axis)
+                self.canvas.draw()
+                self.repaint()
         else:
             for (k, v) in plotopts.items():
                 if isinstance(v, dict):
@@ -217,7 +223,7 @@ class Main(QMainWindow, Ui_MainWindow):
                         else:
                             rr.setChecked(False)
 
-                        rr.toggled.connect(lambda state, oo=oo, v=v: state and v.select(oo) and print(oo))
+                        rr.toggled.connect(lambda state, oo=oo, v=v: state and v.select(oo))
 
 
                         layout.addWidget(rr)
@@ -229,6 +235,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     label = QtWidgets.QLabel(k)
                     layout.addWidget(label)
                     aa = QtWidgets.QLineEdit(str(v))
+                    aa.editingFinished.connect(lambda aa=aa, k=k:  plotopts.__setitem__(k, type(plotopts[k])(aa.text())))
                     layout.addWidget(aa)
                     dialog.addLayout(layout)
 
