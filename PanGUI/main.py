@@ -218,8 +218,12 @@ class Main(QMainWindow, Ui_MainWindow):
                     group = QtWidgets.QGroupBox(k)
                     group.setLayout(layout)
                 else:
+                    layout = QtWidgets.QHBoxLayout()
+                    label = QtWidgets.QLabel(k)
+                    layout.addWidget(label)
                     aa = QtWidgets.QLineEdit(str(v))
-                    dialog.addWidget(aa)
+                    layout.addWidget(aa)
+                    dialog.addLayout(layout)
 
 
 
