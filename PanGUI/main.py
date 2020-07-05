@@ -182,10 +182,18 @@ class Main(QMainWindow, Ui_MainWindow):
         if plotopts is None:
             return
         if dialog is None:
-            dialog = QtWidgets.QDialog()
+            dialog = QtWidgets.QDialog(self)
             dialog.setWindowTitle("Set plot options")
-            layout = QtWidgets.QVBoxLayout(dialog)
-            self.create_dialog(q, plotopts, layout)
+            layout = QtWidgets.QVBoxLayout()
+            dialog.setLayout(layout)
+            tabs = QtWidgets.QTabWidget(dialog)
+            layout.addWidget(tabs)
+            for (ii, plotobj) in enumerate(self.plotobjs):
+                tab = QtWidgets.QWidget()
+                tabs.addTab(tab, "Obj {0}".format(ii))
+                tlayout = QtWidgets.QVBoxLayout()
+                tab.setLayout(tlayout)
+                self.create_dialog(q, plotobj.plotopts, tlayout)
             blayout = QtWidgets.QHBoxLayout()
             buttonOK = QtWidgets.QPushButton("OK")
             blayout.addWidget(buttonOK)
