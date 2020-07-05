@@ -1,5 +1,6 @@
 import sys
 import os
+import copy
 import numpy as np
 import DataProcessingTools as DPT
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -176,11 +177,6 @@ class Main(QMainWindow, Ui_MainWindow):
         Dynamically create a dialog based on the contentents
         of the dictionary `plotopts`.
         """
-        if plotopts is None:
-            if self.active_plotobj is not None:
-                plotopts = self.active_plotobj.plotopts.copy()
-        if plotopts is None:
-            return
         if dialog is None:
             dialog = QtWidgets.QDialog(self)
             dialog.setWindowTitle("Set plot options")
@@ -188,12 +184,13 @@ class Main(QMainWindow, Ui_MainWindow):
             dialog.setLayout(layout)
             tabs = QtWidgets.QTabWidget(dialog)
             layout.addWidget(tabs)
-            for (ii, plotobj) in enumerate(self.plotobjs):
+            plotopts = [copy.deepcopy(plotobj.plotopts) for plotobj in self.plotobjs]
+            for (ii, plotopt) in enumerate(plotopts):
                 tab = QtWidgets.QWidget()
                 tabs.addTab(tab, "Obj {0}".format(ii))
                 tlayout = QtWidgets.QVBoxLayout()
                 tab.setLayout(tlayout)
-                self.create_dialog(q, plotobj.plotopts, tlayout)
+                self.create_dialog(q, plotopt, tlayout)
             blayout = QtWidgets.QHBoxLayout()
             buttonOK = QtWidgets.QPushButton("OK")
             blayout.addWidget(buttonOK)
@@ -206,8 +203,10 @@ class Main(QMainWindow, Ui_MainWindow):
             dialog.setModal(True)
             result = dialog.exec_()
             if result:
-                self.active_plotobj.plotopts = plotopts
-                self.active_plotobj.plot(self.index, ax=self.active_axis)
+                #TODO: Make this work for twinx as well
+                for (ax, plotobj, plotopt) in zip(self.fig.axes, self.plotobjs, plotopts):
+                    plotobj.plotopts = plotopt
+                    plotobj.plot(self.index, ax=ax)
                 self.canvas.draw()
                 self.repaint()
         else:
