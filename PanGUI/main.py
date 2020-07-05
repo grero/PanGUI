@@ -152,19 +152,19 @@ class Main(QMainWindow, Ui_MainWindow):
             idx = self.plotobjs.index(self.active_plotobj)
 
             # unwind path
-            plotopts = {}
+            plotopts = self.active_plotobj.plotopts
             qpath = q.data()["path"]
             _opts = plotopts
             if qpath:
                 cpath = qpath.split("_")
                 for k in cpath:
-                   aa = {}
-                   _opts[k] = aa
                    _opts = _opts[k]
 
-            if q.isCheckable():
+            if isinstance(_opts, DPT.objects.ExclusiveOptions):
+                if q.isChecked():
+                    _opts.select(q.text())
+            elif q.isCheckable():
                 _opts[q.text()] = q.isChecked()
-
             elif not q.isCheckable() and q.menu() is None:  # Text input
                 text, okPressed = QtWidgets.QInputDialog.getText(self,q.text(),"",
                                                                  QtWidgets.QLineEdit.Normal,
@@ -173,7 +173,9 @@ class Main(QMainWindow, Ui_MainWindow):
                     # unwind the path
                     _opts[q.text()] = type(q.data()["value"])(text)
 
-            self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
+            self.active_plotobj.plotopts = plotopts
+            self.active_plotobj.plot(self.index, self.fig.axes[idx])
+            #self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
             self.canvas.draw()
             self.repaint()
 
