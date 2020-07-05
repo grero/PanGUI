@@ -60,6 +60,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 sharey = None
             ax = fig1.add_subplot(rows, cols, i+1, sharex=sharex,
                                   sharey=sharey)
+            plotobj.update_index(indexer)
             plotobj.plot(self.index, ax)
 
         self.active_plotobj = None
