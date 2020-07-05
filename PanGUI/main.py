@@ -110,7 +110,11 @@ class Main(QMainWindow, Ui_MainWindow):
                 action = QtWidgets.QAction(k, self)
                 action.setCheckable(True)
                 action.setChecked(v)
-                action.setData({"path": "_".join((cpath, menu.title()))})
+                if cpath:
+                    qpath = "_".join((cpath, menu.title()))
+                else:
+                    qpath = menu.title()
+                action.setData({"path": qpath})
                 menu.addAction(action)
             elif isinstance(v, dict):
                 if cpath != "":
