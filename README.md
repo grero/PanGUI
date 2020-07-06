@@ -24,23 +24,65 @@ To create a panning window, use the ```create_window``` function, supply a ```pl
 We can see how this works by examining the ```test``` function called above. First we generate some random data
 
 ```python
-import DataProcessingTools as DPT
 
-class PlotObj(DPT.objects.DPObject):
-    def __init__(self):
-        self.data = np.random.random((10, 1000))
-        self.setidx = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1] 
-        self.dirs = ["session01/array01/channel001/cell01",
-                     "session01/array01/channel002/cell01"]
+class PlotObject(DPObject):
+    argsList = ["data", ("title", "test")]
 
-    def plot(self, i=None, ax=None):
+    def __init__(self, *args, **kwargs):
+        DPObject.__init__(self, *args ,**kwargs)
+        self.data = self.args["data"]
+        self.title = self.args["title"]
+        self.indexer = self.getindex("trial")
+        self.setidx = np.zeros((self.data.shape[0],), dtype=np.int)
+        self.current_idx = None
+
+    def plot(self, i=None, getNumEvents=False, getLevels=False, getPlotOpts=False, ax=None, **kwargs):
+        """
+        This function showcases the structure of a plot function that works with PanGUI.
+        """
+        # define the plot options that this function understands
+        plotopts = {"show": True, "factor": 1.0, "level": "trial","overlay": False,
+                    "second_axis": False, "seeds": {"seed1": 1.0, "seed2": 2.0},
+                    "color": DPT.objects.ExclusiveOptions(["red","green"], 0)}
+        if getPlotOpts:
+            return plotopts
+
+        # Extract the recognized plot options from kwargs
+        for (k, v) in plotopts.items():
+            plotopts[k] = kwargs.get(k, v)
+
+        if getNumEvents:
+            # Return the number of events avilable
+            if plotopts["level"] == "trial":
+                return self.data.shape[0]
+            elif plotopts["level"] == "all":
+                return 1
+        if getLevels:        
+            # Return the possible levels for this object
+            return ["trial", "all"]
+        
+        if plotopts["level"] == "all":
+            idx = range(self.data.shape[0])
+        else:
+            idx = i
         if ax is None:
             ax = gca()
-        ax.clear()
-        ax.plot(self.data[i, :].T)
+        if not plotopts["overlay"]:
+            ax.clear()
 
+        if plotopts["show"]:
+            f = plotopts["factor"]
+            pcolor = plotopts["color"].selected()
+            ax.plot(f*self.data[idx, :].T, color=pcolor)
+            ax.axvline(plotopts["seeds"]["seed1"])
+            ax.axvline(plotopts["seeds"]["seed2"])
 
-app = PanGUI.create_window(PlotObj(), indexer="trial")
+            if plotopts["second_axis"]:
+                ax2 = ax.twinx()
+                ax2.plot(0.5*self.data[i, :].T, color="black")
+        return ax
+
+app = PanGUI.create_window(PlotObj())
 ```
 This will pop-up a plot window that plots the rows of `plotobj.data`. Clicking `prev` or `next` will step through the rows, while a specific row can be selected via the textfield.
 
