@@ -29,12 +29,17 @@ class PlotObject(DPObject):
         return max(0, min(i, self.data.shape[0]-1))
 
     def plot(self, i=None, getNumEvents=False, getLevels=False, getPlotOpts=False, ax=None, **kwargs):
+        """
+        This function showcases the structure of a plot function that works with PanGUI.
+        """
+        # define the plot options that this function understands
         plotopts = {"show": True, "factor": 1.0, "level": "trial","overlay": False,
                     "second_axis": False, "seeds": {"seed1": 1.0, "seed2": 2.0},
                     "color": DPT.objects.ExclusiveOptions(["red","green"], 0)}
         if getPlotOpts:
             return plotopts
 
+        # Extract the recognized plot options from kwargs
         for (k, v) in plotopts.items():
             plotopts[k] = kwargs.get(k, v)
 
