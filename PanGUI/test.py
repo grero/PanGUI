@@ -17,7 +17,8 @@ class PlotObject(DPObject):
         self.title = self.args["title"]
         self.plotopts = {"show": True, "factor": 1.0,
                          "seeds": {"seed1": 1.0, "seed2": 2.0},
-                         "color": DPT.objects.ExclusiveOptions(["red","green"], 0)}
+                         "color": DPT.objects.ExclusiveOptions(["red","green"], 0),
+                         "second_axis": False}
         self.indexer = self.getindex("trial")
         self.setidx = np.zeros((self.data.shape[0],), dtype=np.int)
         self.current_idx = None
@@ -43,6 +44,9 @@ class PlotObject(DPObject):
             ax.plot(f*self.data[i, :].T, color=pcolor)
             ax.axvline(self.plotopts["seeds"]["seed1"])
             ax.axvline(self.plotopts["seeds"]["seed2"])
+            if self.plotopts["second_axis"]:
+                ax2 = ax.twinx()
+                ax2.plot(0.5*self.data[i, :].T, color="black")
         return ax
 
 

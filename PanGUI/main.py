@@ -86,7 +86,19 @@ class Main(QMainWindow, Ui_MainWindow):
             if event.inaxes is not None:
                 # figure out what is being plotted
                 axidx = self.fig.axes.index(event.inaxes)
-                plotobj = self.plotobjs[axidx]
+                if axidx < len(self.plotobjs):
+                    plotobj = self.plotobjs[axidx]
+                else:
+                    # e.g. ax is the result of twinx
+                    # attempt to use axis position to figure out the index
+                    pos0 = event.inaxes.get_position()
+                    for (ii, _ax) in enumerate(self.fig.axes):
+                        pos1 = _ax.get_position()
+                        if np.allclose(pos0, pos1):
+                            plotobj = self.plotobjs[ii]
+                            break
+
+
                 self.active_plotobj = plotobj
                 self.active_axis = event.inaxes
                 popupMenu = QtWidgets.QMenu(self)
@@ -268,6 +280,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def gonext(self):
         self.update_index(self.index+1)
         self.currentIndex.setText(str(self.index))
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
@@ -278,6 +292,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def goprev(self):
         self.update_index(self.index-1)
         self.currentIndex.setText(str(self.index))
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
@@ -286,6 +302,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def updateIndex(self):
         self.update_index(int(self.currentIndex.text()))
         self.currentIndex.setText(str(self.index))  # Update the index shown
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, self.fig.axes[i])
         self.canvas.draw()
