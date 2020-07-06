@@ -122,7 +122,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 action.setCheckable(True)
                 action.setChecked(v)
                
-              if cpath:
+                if cpath:
                     qpath = "_".join((cpath, menu.title()))
                 else:
                     qpath = menu.title()
