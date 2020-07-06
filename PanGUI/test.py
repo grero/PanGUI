@@ -19,15 +19,6 @@ class PlotObject(DPObject):
         self.setidx = np.zeros((self.data.shape[0],), dtype=np.int)
         self.current_idx = None
 
-    def load(self):
-        fname = os.path.join(self.name, self.ext)
-        if os.path.isfile(fname):
-            if self.ext == "mat":
-                dd = mio.loadmat(fname, squeeze_me=True)
-
-    def update_idx(self, i):
-        return max(0, min(i, self.data.shape[0]-1))
-
     def plot(self, i=None, getNumEvents=False, getLevels=False, getPlotOpts=False, ax=None, **kwargs):
         """
         This function showcases the structure of a plot function that works with PanGUI.
