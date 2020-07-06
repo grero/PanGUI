@@ -11,13 +11,10 @@ import os
 class PlotObject(DPObject):
     argsList = ["data", ("title", "test")]
 
-    def __init__(self,*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         DPObject.__init__(self, *args ,**kwargs)
         self.data = self.args["data"]
         self.title = self.args["title"]
-        self.plotopts = {"show": True, "factor": 1.0,
-                         "seeds": {"seed1": 1.0, "seed2": 2.0},
-                         "color": DPT.objects.ExclusiveOptions(["red","green"], 0)}
         self.indexer = self.getindex("trial")
         self.setidx = np.zeros((self.data.shape[0],), dtype=np.int)
         self.current_idx = None
@@ -31,31 +28,40 @@ class PlotObject(DPObject):
     def update_idx(self, i):
         return max(0, min(i, self.data.shape[0]-1))
 
-    def plot(self, i=None, return_nevents=False, query_evels=False, ax=None):
-        if return_nevents:
+    def plot(self, i=None, getNumEvents=False, getLevels=False, getPlotOpts=False, ax=None, **kwargs):
+        plotopts = {"show": True, "factor": 1.0, "level": "trial","overlay": False,
+                    "seeds": {"seed1": 1.0, "seed2": 2.0},
+                    "color": DPT.objects.ExclusiveOptions(["red","green"], 0)}
+        if getPlotOpts:
+            return plotopts
+
+        for (k, v) in plotopts.items():
+            plotopts[k] = kwargs.get(k, v)
+
+        if getNumEvents:
             # Return the number of events avilable
-            if self.plotopts["level"] == "trial":
+            if plotopts["level"] == "trial":
                 return self.data.shape[0]
-            elif self.plotopts["level"] == "all":
+            elif plotopts["level"] == "all":
                 return 1
-        if query_evels:        
+        if getLevels:        
             # Return the possible levels for this object
             return ["trial","all"]
         
-        if self.plotots["level"] == "all":
+        if plotopts["level"] == "all":
             idx = range(self.data.shape[0])
         else:
             idx = i
         if ax is None:
             ax = gca()
-        if not self.plotopts["overlay"]:
+        if not plotopts["overlay"]:
             ax.clear()
-        if self.plotopts["show"]:
-            f = self.plotopts["factor"]
-            pcolor = self.plotopts["color"].selected()
+        if plotopts["show"]:
+            f = plotopts["factor"]
+            pcolor = plotopts["color"].selected()
             ax.plot(f*self.data[idx, :].T, color=pcolor)
-            ax.axvline(self.plotopts["seeds"]["seed1"])
-            ax.axvline(self.plotopts["seeds"]["seed2"])
+            ax.axvline(plotopts["seeds"]["seed1"])
+            ax.axvline(plotopts["seeds"]["seed2"])
         return ax
 
 
