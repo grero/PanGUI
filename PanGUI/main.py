@@ -167,7 +167,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def update_index(self, new_index):
         index = self.index
         for plotobj in self.plotobjs:
-            if len(plotobj.indexer(new_index)) > 0:
+            nn = plotobj.plot(return_nevents=True)
+            if 0 <= new_index < nn:
                 index = new_index
             else:
                 index = self.index
