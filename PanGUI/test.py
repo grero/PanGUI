@@ -30,7 +30,7 @@ class PlotObject(DPObject):
 
     def plot(self, i=None, getNumEvents=False, getLevels=False, getPlotOpts=False, ax=None, **kwargs):
         plotopts = {"show": True, "factor": 1.0, "level": "trial","overlay": False,
-                    "seeds": {"seed1": 1.0, "seed2": 2.0},
+                    "second_axis": False, "seeds": {"seed1": 1.0, "seed2": 2.0},
                     "color": DPT.objects.ExclusiveOptions(["red","green"], 0)}
         if getPlotOpts:
             return plotopts
