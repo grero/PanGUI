@@ -46,7 +46,7 @@ class PlotObject(DPObject):
                 return 1
         if getLevels:        
             # Return the possible levels for this object
-            return ["trial","all"]
+            return ["trial", "all"]
         
         if plotopts["level"] == "all":
             idx = range(self.data.shape[0])
