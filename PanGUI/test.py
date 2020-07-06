@@ -31,16 +31,29 @@ class PlotObject(DPObject):
     def update_idx(self, i):
         return max(0, min(i, self.data.shape[0]-1))
 
-    def plot(self, i, ax=None, overlay=False):
-        self.current_idx = i
+    def plot(self, i=None, return_nevents=False, query_evels=False, ax=None):
+        if return_nevents:
+            # Return the number of events avilable
+            if self.plotopts["level"] == "trial":
+                return self.data.shape[0]
+            elif self.plotopts["level"] == "all":
+                return 1
+        if query_evels:        
+            # Return the possible levels for this object
+            return ["trial","all"]
+        
+        if self.plotots["level"] == "all":
+            idx = range(self.data.shape[0])
+        else:
+            idx = i
         if ax is None:
             ax = gca()
-        if not overlay:
+        if not self.plotopts["overlay"]:
             ax.clear()
         if self.plotopts["show"]:
             f = self.plotopts["factor"]
             pcolor = self.plotopts["color"].selected()
-            ax.plot(f*self.data[i, :].T, color=pcolor)
+            ax.plot(f*self.data[idx, :].T, color=pcolor)
             ax.axvline(self.plotopts["seeds"]["seed1"])
             ax.axvline(self.plotopts["seeds"]["seed2"])
         return ax
