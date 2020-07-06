@@ -1,5 +1,6 @@
 import sys
 import os
+import copy
 import numpy as np
 import DataProcessingTools as DPT
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -63,6 +64,7 @@ class Main(QMainWindow, Ui_MainWindow):
             plotobj.plot(self.index, ax=ax, **self.plotopts[i])
 
         self.active_plotobj = None
+        self.active_axis = None
 
     def addmpl(self, fig):
         self.fig = fig
@@ -84,13 +86,33 @@ class Main(QMainWindow, Ui_MainWindow):
             if event.inaxes is not None:
                 # figure out what is being plotted
                 axidx = self.fig.axes.index(event.inaxes)
-                plotobj = self.plotobjs[axidx]
+                if axidx < len(self.plotobjs):
+                    plotobj = self.plotobjs[axidx]
+                else:
+                    # e.g. ax is the result of twinx
+                    # attempt to use axis position to figure out the index
+                    pos0 = event.inaxes.get_position()
+                    for (ii, _ax) in enumerate(self.fig.axes):
+                        pos1 = _ax.get_position()
+                        if np.allclose(pos0, pos1):
+                            plotobj = self.plotobjs[ii]
+                            break
+
+
                 self.active_plotobj = plotobj
+
                 plotopts = self.plotopts[axidx]
                 popupMenu = QtWidgets.QMenu(self)
                 self.create_menu(plotopts, popupMenu)
+                self.active_axis = event.inaxes
+
+                # add popup dialog as the last optoon
+                daction = QtWidgets.QAction("Set all...", self)
+                popupMenu.addAction(daction)
+
                 cursor = QtGui.QCursor()
                 popupMenu.triggered[QtWidgets.QAction].connect(self.setplotopts)
+                daction.triggered.connect(self.create_dialog)
                 popupMenu.popup(cursor.pos())
 
     def create_menu(self, q, menu=None, cpath=""):
@@ -103,7 +125,8 @@ class Main(QMainWindow, Ui_MainWindow):
                 action = QtWidgets.QAction(k, self)
                 action.setCheckable(True)
                 action.setChecked(v)
-                if cpath != "":
+               
+                if cpath:
                     qpath = "_".join((cpath, menu.title()))
                 else:
                     qpath = menu.title()
@@ -137,11 +160,16 @@ class Main(QMainWindow, Ui_MainWindow):
                 menu.addAction(action)
 
     def setplotopts(self, q):
+        # Kind of hackish, but needed since setplotopts currently gets called for any 
+        # menu selection
+        if q.text() == "Set all...":
+            return None
         if self.active_plotobj is not None:
             idx = self.plotobjs.index(self.active_plotobj)
 
-            # unwind path
             plotopts = self.plotopts[idx]
+
+            # unwind path
             qpath = q.data()["path"]
             _opts = plotopts
             if qpath:
@@ -149,9 +177,11 @@ class Main(QMainWindow, Ui_MainWindow):
                 for k in cpath:
                    _opts = _opts[k]
 
-            if q.isCheckable():
+            if isinstance(_opts, DPT.objects.ExclusiveOptions):
+                if q.isChecked():
+                    _opts.select(q.text())
+            elif q.isCheckable():
                 _opts[q.text()] = q.isChecked()
-
             elif not q.isCheckable() and q.menu() is None:  # Text input
                 text, okPressed = QtWidgets.QInputDialog.getText(self,q.text(),"",
                                                                  QtWidgets.QLineEdit.Normal,
@@ -161,8 +191,85 @@ class Main(QMainWindow, Ui_MainWindow):
                     _opts[q.text()] = type(q.data()["value"])(text)
             
             self.active_plotobj.plot(self.index, ax=self.fig.axes[idx], **plotopts)
+
             self.canvas.draw()
             self.repaint()
+
+    def create_dialog(self, q, plotopts=None, dialog=None):
+        """
+        Dynamically create a dialog based on the contentents
+        of the dictionary `plotopts`.
+        """
+        if dialog is None:
+            dialog = QtWidgets.QDialog(self)
+            dialog.setWindowTitle("Set plot options")
+            layout = QtWidgets.QVBoxLayout()
+            dialog.setLayout(layout)
+            tabs = QtWidgets.QTabWidget(dialog)
+            layout.addWidget(tabs)
+            plotopts = [copy.deepcopy(plotobj.plotopts) for plotobj in self.plotobjs]
+            for (ii, plotopt) in enumerate(plotopts):
+                tab = QtWidgets.QWidget()
+                tabs.addTab(tab, "Obj {0}".format(ii))
+                tlayout = QtWidgets.QVBoxLayout()
+                tab.setLayout(tlayout)
+                self.create_dialog(q, plotopt, tlayout)
+            blayout = QtWidgets.QHBoxLayout()
+            buttonOK = QtWidgets.QPushButton("OK")
+            blayout.addWidget(buttonOK)
+            buttonOK.clicked.connect(dialog.accept)
+            buttonCancel = QtWidgets.QPushButton("Cancel")
+            blayout.addWidget(buttonCancel)
+            layout.addLayout(blayout)
+
+            buttonCancel.clicked.connect(dialog.reject)
+            dialog.setModal(True)
+            result = dialog.exec_()
+            if result:
+                #TODO: Make this work for twinx as well
+                for (ax, plotobj, plotopt) in zip(self.fig.axes, self.plotobjs, plotopts):
+                    plotobj.plotopts = plotopt
+                    plotobj.plot(self.index, ax=ax)
+                self.canvas.draw()
+                self.repaint()
+        else:
+            for (k, v) in plotopts.items():
+                if isinstance(v, dict):
+                    group = QtWidgets.QGroupBox(k)
+                    layout = QtWidgets.QVBoxLayout(group)
+                    dialog.addWidget(group)
+                    self.create_dialog(q, v, layout)
+                elif isinstance(v, bool):
+                    aa = QtWidgets.QCheckBox(k)
+                    dialog.addWidget(aa)
+                    aa.setChecked(v)
+                    aa.stateChanged.connect(lambda state, k=k: plotopts.__setitem__(k, state == QtCore.Qt.Checked))
+                elif isinstance(v, DPT.objects.ExclusiveOptions):
+                    layout = QtWidgets.QVBoxLayout()
+                    for (ii, oo) in enumerate(v.options):
+                        rr = QtWidgets.QRadioButton(oo)
+                        if ii == v.checked: 
+                            rr.setChecked(True)
+                        else:
+                            rr.setChecked(False)
+
+                        rr.toggled.connect(lambda state, oo=oo, v=v: state and v.select(oo))
+
+
+                        layout.addWidget(rr)
+                    group = QtWidgets.QGroupBox(k)
+                    group.setLayout(layout)
+                    dialog.addWidget(group)
+                else:
+                    layout = QtWidgets.QHBoxLayout()
+                    label = QtWidgets.QLabel(k)
+                    layout.addWidget(label)
+                    aa = QtWidgets.QLineEdit(str(v))
+                    aa.editingFinished.connect(lambda aa=aa, k=k:  plotopts.__setitem__(k, type(plotopts[k])(aa.text())))
+                    layout.addWidget(aa)
+                    dialog.addLayout(layout)
+
+
 
     def update_index(self, new_index):
         index = self.index
@@ -178,6 +285,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def gonext(self):
         self.update_index(self.index+1)
         self.currentIndex.setText(str(self.index))
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, ax=self.fig.axes[i],**self.plotopts[i])
         self.canvas.draw()
@@ -188,6 +297,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def goprev(self):
         self.update_index(self.index-1)
         self.currentIndex.setText(str(self.index))
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
         self.canvas.draw()
@@ -196,6 +307,8 @@ class Main(QMainWindow, Ui_MainWindow):
     def updateIndex(self):
         self.update_index(int(self.currentIndex.text()))
         self.currentIndex.setText(str(self.index))  # Update the index shown
+        for _ax in self.fig.axes:
+            _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
         self.canvas.draw()

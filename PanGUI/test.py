@@ -56,12 +56,17 @@ class PlotObject(DPObject):
             ax = gca()
         if not plotopts["overlay"]:
             ax.clear()
+
         if plotopts["show"]:
             f = plotopts["factor"]
             pcolor = plotopts["color"].selected()
             ax.plot(f*self.data[idx, :].T, color=pcolor)
             ax.axvline(plotopts["seeds"]["seed1"])
             ax.axvline(plotopts["seeds"]["seed2"])
+
+            if plotopts["second_axis"]:
+                ax2 = ax.twinx()
+                ax2.plot(0.5*self.data[i, :].T, color="black")
         return ax
 
 
