@@ -60,7 +60,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 sharey = None
             ax = fig1.add_subplot(rows, cols, i+1, sharex=sharex,
                                   sharey=sharey)
-            plotobj.plot(self.index, ax)
+            plotobj.plot(self.index, ax=ax, **self.plotopts[i])
 
         self.active_plotobj = None
 
@@ -86,8 +86,9 @@ class Main(QMainWindow, Ui_MainWindow):
                 axidx = self.fig.axes.index(event.inaxes)
                 plotobj = self.plotobjs[axidx]
                 self.active_plotobj = plotobj
+                plotopts = self.plotopts[axidx]
                 popupMenu = QtWidgets.QMenu(self)
-                self.create_menu(plotobj.plotopts, popupMenu)
+                self.create_menu(plotopts, popupMenu)
                 cursor = QtGui.QCursor()
                 popupMenu.triggered[QtWidgets.QAction].connect(self.setplotopts)
                 popupMenu.popup(cursor.pos())
@@ -140,14 +141,12 @@ class Main(QMainWindow, Ui_MainWindow):
             idx = self.plotobjs.index(self.active_plotobj)
 
             # unwind path
-            plotopts = {}
+            plotopts = self.plotopts[idx]
             qpath = q.data()["path"]
             _opts = plotopts
             if qpath:
                 cpath = qpath.split("_")
                 for k in cpath:
-                   aa = {}
-                   _opts[k] = aa
                    _opts = _opts[k]
 
             if q.isCheckable():
@@ -160,15 +159,15 @@ class Main(QMainWindow, Ui_MainWindow):
                 if okPressed:
                     # unwind the path
                     _opts[q.text()] = type(q.data()["value"])(text)
-
-            self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
+            
+            self.active_plotobj.plot(self.index, ax=self.fig.axes[idx], **plotopts)
             self.canvas.draw()
             self.repaint()
 
     def update_index(self, new_index):
         index = self.index
         for plotobj in self.plotobjs:
-            nn = plotobj.plot(return_nevents=True)
+            nn = plotobj.plot(getNumEvents=True)
             if 0 <= new_index < nn:
                 index = new_index
             else:
@@ -180,7 +179,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.update_index(self.index+1)
         self.currentIndex.setText(str(self.index))
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
+            plotobj.plot(self.index, ax=self.fig.axes[i],**self.plotopts[i])
         self.canvas.draw()
         # I don't think should be necessary here, but the plot doesn't
         # seem to update otherwise
@@ -190,7 +189,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.update_index(self.index-1)
         self.currentIndex.setText(str(self.index))
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
+            plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
         self.canvas.draw()
         self.repaint()
 
@@ -198,7 +197,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.update_index(int(self.currentIndex.text()))
         self.currentIndex.setText(str(self.index))  # Update the index shown
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
+            plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
         self.canvas.draw()
 
 
