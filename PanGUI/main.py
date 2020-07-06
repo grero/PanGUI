@@ -207,7 +207,7 @@ class Main(QMainWindow, Ui_MainWindow):
             dialog.setLayout(layout)
             tabs = QtWidgets.QTabWidget(dialog)
             layout.addWidget(tabs)
-            plotopts = [copy.deepcopy(plotobj.plotopts) for plotobj in self.plotobjs]
+            plotopts = [copy.deepcopy(plotopt) for plotopt in self.plotopts]
             for (ii, plotopt) in enumerate(plotopts):
                 tab = QtWidgets.QWidget()
                 tabs.addTab(tab, "Obj {0}".format(ii))
@@ -227,9 +227,9 @@ class Main(QMainWindow, Ui_MainWindow):
             result = dialog.exec_()
             if result:
                 #TODO: Make this work for twinx as well
-                for (ax, plotobj, plotopt) in zip(self.fig.axes, self.plotobjs, plotopts):
-                    plotobj.plotopts = plotopt
-                    plotobj.plot(self.index, ax=ax)
+                self.plotopts = plotopts
+                for (ax, plotobj, plotopt) in zip(self.fig.axes, self.plotobjs, self.plotopts):
+                    plotobj.plot(self.index, ax=ax, **plotopt)
                 self.canvas.draw()
                 self.repaint()
         else:
