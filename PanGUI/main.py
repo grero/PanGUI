@@ -104,13 +104,13 @@ class Main(QMainWindow, Ui_MainWindow):
             popupMenu = QtWidgets.QMenu(self)
         else:
             popupMenu = menu
-
         for (k, v) in q.items():
             if isinstance(v, bool):
                 action = QtWidgets.QAction(k, self)
                 action.setCheckable(True)
                 action.setChecked(v)
-                if cpath:
+               
+              if cpath:
                     qpath = "_".join((cpath, menu.title()))
                 else:
                     qpath = menu.title()
