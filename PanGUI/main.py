@@ -34,6 +34,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.plotobjs = plotobjs
         else:
             self.plotobjs = [plotobjs]
+        self.plotopts = [plotobj.plot(getPlotOpts=True) for plotobj in self.plotobjs]
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
