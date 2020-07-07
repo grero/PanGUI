@@ -172,31 +172,34 @@ class Main(QMainWindow, Ui_MainWindow):
 
             # unwind path
             qpath = q.data()["path"]
-            _opts = self.plotopts
-            for ii in range(len(self.plotopts)):
-                if qpath:
-                    cpath = qpath.split("_")
-                    for k in cpath:
-                        _opts[ii] = _opts[ii][k]
+            _opts = plotopts
+            if qpath:
+                cpath = qpath.split("_")
+                for k in cpath:
+                    _opts = _opts[k]
 
             if isinstance(_opts, DPT.objects.ExclusiveOptions):
                 if q.isChecked():
-                    _opts[idx].select(q.text())
+                    _opts.select(q.text())
             elif q.isCheckable():
-                _opts[idx][q.text()] = q.isChecked()
+                _opts[q.text()] = q.isChecked()
             elif not q.isCheckable() and q.menu() is None:  # Text input
                 text, okPressed = QtWidgets.QInputDialog.getText(self,q.text(),"",
                                                                  QtWidgets.QLineEdit.Normal,
                                                                  str(q.data()["value"]))
                 if okPressed:
                     # unwind the path
-                    _opts[idx][q.text()] = type(q.data()["value"])(text)
+                    _opts[q.text()] = type(q.data()["value"])(text)
                     if q.text() == "level":
                         # this should be synchronised across objects
                         replotAll = True
-                        for ii in range(len(_opts)):
-                            _opts[ii][q.text()] = _opts[idx][q.text()] 
-
+                        for ii in range(len(self.plotopts)):
+                            _optsii = self.plotopts[ii]
+                            if qpath:
+                                cpath = qpath.split("_")
+                                for k in cpath:
+                                    _optsi = _optsii[k]
+                            _optsii[q.text()] = _opts[q.text()]
             
             if replotAll:
                 # set index to 0
