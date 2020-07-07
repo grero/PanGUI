@@ -162,6 +162,7 @@ class Main(QMainWindow, Ui_MainWindow):
     def setplotopts(self, q):
         # Kind of hackish, but needed since setplotopts currently gets called for any 
         # menu selection
+        replotAll = False
         if q.text() == "Set all...":
             return None
         if self.active_plotobj is not None:
@@ -171,26 +172,41 @@ class Main(QMainWindow, Ui_MainWindow):
 
             # unwind path
             qpath = q.data()["path"]
-            _opts = plotopts
-            if qpath:
-                cpath = qpath.split("_")
-                for k in cpath:
-                   _opts = _opts[k]
+            _opts = self.plotopts
+            for ii in range(len(self.plotopts)):
+                if qpath:
+                    cpath = qpath.split("_")
+                    for k in cpath:
+                        _opts[ii] = _opts[ii][k]
 
             if isinstance(_opts, DPT.objects.ExclusiveOptions):
                 if q.isChecked():
-                    _opts.select(q.text())
+                    _opts[idx].select(q.text())
             elif q.isCheckable():
-                _opts[q.text()] = q.isChecked()
+                _opts[idx][q.text()] = q.isChecked()
             elif not q.isCheckable() and q.menu() is None:  # Text input
                 text, okPressed = QtWidgets.QInputDialog.getText(self,q.text(),"",
                                                                  QtWidgets.QLineEdit.Normal,
                                                                  str(q.data()["value"]))
                 if okPressed:
                     # unwind the path
-                    _opts[q.text()] = type(q.data()["value"])(text)
+                    _opts[idx][q.text()] = type(q.data()["value"])(text)
+                    if q.text() == "level":
+                        # this should be synchronised across objects
+                        replotAll = True
+                        for ii in range(len(_opts)):
+                            _opts[ii][q.text()] = _opts[idx][q.text()] 
+
             
-            self.active_plotobj.plot(self.index, ax=self.fig.axes[idx], **plotopts)
+            if replotAll:
+                # set index to 0
+                self.currentIndex.setText("0")
+                self.updateIndex()
+                for ii in range(len(self.plotobjs)):
+                    if ii != idx:
+                        self.plotobjs[ii].plot(self.index, ax=self.fig.axes[ii], **self.plotopts[ii])
+
+            self.active_plotobj.plot(self.index, ax=self.fig.axes[idx], **self.plotopts[idx])
 
             self.canvas.draw()
             self.repaint()
