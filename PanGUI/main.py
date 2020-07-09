@@ -125,7 +125,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 action = QtWidgets.QAction(k, self)
                 action.setCheckable(True)
                 action.setChecked(v)
-               
+
                 if cpath:
                     qpath = "_".join((cpath, menu.title()))
                 else:
@@ -160,7 +160,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 menu.addAction(action)
 
     def setplotopts(self, q):
-        # Kind of hackish, but needed since setplotopts currently gets called for any 
+        # Kind of hackish, but needed since setplotopts currently gets called for any
         # menu selection
         replotAll = False
         if q.text() == "Set all...":
@@ -267,7 +267,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     layout = QtWidgets.QVBoxLayout()
                     for (ii, oo) in enumerate(v.options):
                         rr = QtWidgets.QRadioButton(oo)
-                        if ii == v.checked: 
+                        if ii == v.checked:
                             rr.setChecked(True)
                         else:
                             rr.setChecked(False)
