@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name="PanGUI",
-      version="0.7.1",
+      version="0.8.0",
       description="Utility to pan through plots",
       url="https://github.com/grero/PanGUI.git",
       author="Roger Herikstad",
