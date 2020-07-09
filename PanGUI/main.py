@@ -35,6 +35,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.plotobjs = plotobjs
         else:
             self.plotobjs = [plotobjs]
+        self.plotopts = [plotobj.plot(getPlotOpts=True) for plotobj in self.plotobjs]
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
@@ -60,8 +61,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 sharey = None
             ax = fig1.add_subplot(rows, cols, i+1, sharex=sharex,
                                   sharey=sharey)
-            plotobj.update_index(indexer)
-            plotobj.plot(self.index, ax)
+            plotobj.plot(self.index, ax=ax, **self.plotopts[i])
 
         self.active_plotobj = None
         self.active_axis = None
@@ -100,12 +100,16 @@ class Main(QMainWindow, Ui_MainWindow):
 
 
                 self.active_plotobj = plotobj
-                self.active_axis = event.inaxes
+
+                plotopts = self.plotopts[axidx]
                 popupMenu = QtWidgets.QMenu(self)
-                self.create_menu(plotobj.plotopts, popupMenu)
+                self.create_menu(plotopts, popupMenu)
+                self.active_axis = event.inaxes
+
                 # add popup dialog as the last optoon
                 daction = QtWidgets.QAction("Set all...", self)
                 popupMenu.addAction(daction)
+
                 cursor = QtGui.QCursor()
                 popupMenu.triggered[QtWidgets.QAction].connect(self.setplotopts)
                 daction.triggered.connect(self.create_dialog)
@@ -158,19 +162,21 @@ class Main(QMainWindow, Ui_MainWindow):
     def setplotopts(self, q):
         # Kind of hackish, but needed since setplotopts currently gets called for any 
         # menu selection
+        replotAll = False
         if q.text() == "Set all...":
             return None
         if self.active_plotobj is not None:
             idx = self.plotobjs.index(self.active_plotobj)
 
+            plotopts = self.plotopts[idx]
+
             # unwind path
-            plotopts = self.active_plotobj.plotopts
             qpath = q.data()["path"]
             _opts = plotopts
             if qpath:
                 cpath = qpath.split("_")
                 for k in cpath:
-                   _opts = _opts[k]
+                    _opts = _opts[k]
 
             if isinstance(_opts, DPT.objects.ExclusiveOptions):
                 if q.isChecked():
@@ -184,10 +190,27 @@ class Main(QMainWindow, Ui_MainWindow):
                 if okPressed:
                     # unwind the path
                     _opts[q.text()] = type(q.data()["value"])(text)
+                    if q.text() == "level":
+                        # this should be synchronised across objects
+                        replotAll = True
+                        for ii in range(len(self.plotopts)):
+                            _optsii = self.plotopts[ii]
+                            if qpath:
+                                cpath = qpath.split("_")
+                                for k in cpath:
+                                    _optsi = _optsii[k]
+                            _optsii[q.text()] = _opts[q.text()]
+            
+            if replotAll:
+                # set index to 0
+                self.currentIndex.setText("0")
+                self.updateIndex()
+                for ii in range(len(self.plotobjs)):
+                    if ii != idx:
+                        self.plotobjs[ii].plot(self.index, ax=self.fig.axes[ii], **self.plotopts[ii])
 
-            self.active_plotobj.plotopts = plotopts
-            self.active_plotobj.plot(self.index, self.fig.axes[idx])
-            #self.active_plotobj.update_plotopts(plotopts, self.fig.axes[idx])
+            self.active_plotobj.plot(self.index, ax=self.fig.axes[idx], **self.plotopts[idx])
+
             self.canvas.draw()
             self.repaint()
 
@@ -203,7 +226,7 @@ class Main(QMainWindow, Ui_MainWindow):
             dialog.setLayout(layout)
             tabs = QtWidgets.QTabWidget(dialog)
             layout.addWidget(tabs)
-            plotopts = [copy.deepcopy(plotobj.plotopts) for plotobj in self.plotobjs]
+            plotopts = [copy.deepcopy(plotopt) for plotopt in self.plotopts]
             for (ii, plotopt) in enumerate(plotopts):
                 tab = QtWidgets.QWidget()
                 tabs.addTab(tab, "Obj {0}".format(ii))
@@ -223,9 +246,9 @@ class Main(QMainWindow, Ui_MainWindow):
             result = dialog.exec_()
             if result:
                 #TODO: Make this work for twinx as well
-                for (ax, plotobj, plotopt) in zip(self.fig.axes, self.plotobjs, plotopts):
-                    plotobj.plotopts = plotopt
-                    plotobj.plot(self.index, ax=ax)
+                self.plotopts = plotopts
+                for (ax, plotobj, plotopt) in zip(self.fig.axes, self.plotobjs, self.plotopts):
+                    plotobj.plot(self.index, ax=ax, **plotopt)
                 self.canvas.draw()
                 self.repaint()
         else:
@@ -269,8 +292,9 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def update_index(self, new_index):
         index = self.index
-        for plotobj in self.plotobjs:
-            if len(plotobj.indexer(new_index)) > 0:
+        for (plotobj, plotopts) in zip(self.plotobjs, self.plotopts):
+            nn = plotobj.plot(getNumEvents=True, **plotopts)
+            if 0 <= new_index < nn:
                 index = new_index
             else:
                 index = self.index
@@ -283,7 +307,7 @@ class Main(QMainWindow, Ui_MainWindow):
         for _ax in self.fig.axes:
             _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
+            plotobj.plot(self.index, ax=self.fig.axes[i],**self.plotopts[i])
         self.canvas.draw()
         # I don't think should be necessary here, but the plot doesn't
         # seem to update otherwise
@@ -295,7 +319,7 @@ class Main(QMainWindow, Ui_MainWindow):
         for _ax in self.fig.axes:
             _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
+            plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
         self.canvas.draw()
         self.repaint()
 
@@ -305,7 +329,7 @@ class Main(QMainWindow, Ui_MainWindow):
         for _ax in self.fig.axes:
             _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, self.fig.axes[i])
+            plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
         self.canvas.draw()
 
 

@@ -11,40 +11,56 @@ import os
 class PlotObject(DPObject):
     argsList = ["data", ("title", "test")]
 
-    def __init__(self,*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         DPObject.__init__(self, *args ,**kwargs)
         self.data = self.args["data"]
         self.title = self.args["title"]
-        self.plotopts = {"show": True, "factor": 1.0,
-                         "seeds": {"seed1": 1.0, "seed2": 2.0},
-                         "color": DPT.objects.ExclusiveOptions(["red","green"], 0),
-                         "second_axis": False}
         self.indexer = self.getindex("trial")
         self.setidx = np.zeros((self.data.shape[0],), dtype=np.int)
         self.current_idx = None
 
-    def load(self):
-        fname = os.path.join(self.name, self.ext)
-        if os.path.isfile(fname):
-            if self.ext == "mat":
-                dd = mio.loadmat(fname, squeeze_me=True)
+    def plot(self, i=None, getNumEvents=False, getLevels=False, getPlotOpts=False, ax=None, **kwargs):
+        """
+        This function showcases the structure of a plot function that works with PanGUI.
+        """
+        # define the plot options that this function understands
+        plotopts = {"show": True, "factor": 1.0, "level": "trial","overlay": False,
+                    "second_axis": False, "seeds": {"seed1": 1.0, "seed2": 2.0},
+                    "color": DPT.objects.ExclusiveOptions(["red","green"], 0)}
+        if getPlotOpts:
+            return plotopts
 
-    def update_idx(self, i):
-        return max(0, min(i, self.data.shape[0]-1))
+        # Extract the recognized plot options from kwargs
+        for (k, v) in plotopts.items():
+            plotopts[k] = kwargs.get(k, v)
 
-    def plot(self, i, ax=None, overlay=False):
-        self.current_idx = i
+        if getNumEvents:
+            # Return the number of events avilable
+            if plotopts["level"] == "trial":
+                return self.data.shape[0]
+            elif plotopts["level"] == "all":
+                return 1
+        if getLevels:        
+            # Return the possible levels for this object
+            return ["trial", "all"]
+        
+        if plotopts["level"] == "all":
+            idx = range(self.data.shape[0])
+        else:
+            idx = i
         if ax is None:
             ax = gca()
-        if not overlay:
+        if not plotopts["overlay"]:
             ax.clear()
-        if self.plotopts["show"]:
-            f = self.plotopts["factor"]
-            pcolor = self.plotopts["color"].selected()
-            ax.plot(f*self.data[i, :].T, color=pcolor)
-            ax.axvline(self.plotopts["seeds"]["seed1"])
-            ax.axvline(self.plotopts["seeds"]["seed2"])
-            if self.plotopts["second_axis"]:
+
+        if plotopts["show"]:
+            f = plotopts["factor"]
+            pcolor = plotopts["color"].selected()
+            ax.plot(f*self.data[idx, :].T, color=pcolor)
+            ax.axvline(plotopts["seeds"]["seed1"])
+            ax.axvline(plotopts["seeds"]["seed2"])
+
+            if plotopts["second_axis"]:
                 ax2 = ax.twinx()
                 ax2.plot(0.5*self.data[i, :].T, color="black")
         return ax
