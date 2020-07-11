@@ -168,7 +168,10 @@ class Main(QMainWindow, Ui_MainWindow):
     def setplotopts(self, q):
         # Kind of hackish, but needed since setplotopts currently gets called for any
         # menu selection
-        replotAll = False
+        if len(self.plotobjs) > 1:
+            replotAll = False
+        else:
+            replotAll = True
         if q.text() == "Set all...":
             return None
         if self.active_plotobj is not None:
