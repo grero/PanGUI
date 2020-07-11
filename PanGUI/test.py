@@ -108,5 +108,5 @@ def test(linkaxes=True):
 
 def test_single():
     data1 = np.random.random((10, 1000))
-    pp1 = PlotObject(data1)
+    pp1 = PlotObject(data1, normpath=False)
     ppg = PanGUI.create_window(pp1)
