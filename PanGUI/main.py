@@ -204,7 +204,7 @@ class Main(QMainWindow, Ui_MainWindow):
                             if qpath:
                                 cpath = qpath.split("_")
                                 for k in cpath:
-                                    _optsi = _optsii[k]
+                                    _optsii = _optsii[k]
                             _optsii[q.text()] = _opts[q.text()]
 
             if replotAll:
