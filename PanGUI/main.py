@@ -196,16 +196,6 @@ class Main(QMainWindow, Ui_MainWindow):
                 if okPressed:
                     # unwind the path
                     _opts[q.text()] = type(q.data()["value"])(text)
-                    if q.text() == "level":
-                        # this should be synchronised across objects
-                        replotAll = True
-                        for ii in range(len(self.plotopts)):
-                            _optsii = self.plotopts[ii]
-                            if qpath:
-                                cpath = qpath.split("_")
-                                for k in cpath:
-                                    _optsii = _optsii[k]
-                            _optsii[q.text()] = _opts[q.text()]
 
             if replotAll:
                 # update all objects with the new level info
@@ -252,6 +242,7 @@ class Main(QMainWindow, Ui_MainWindow):
             if result:
                 #TODO: Make this work for twinx as well
                 self.plotopts = plotopts
+                self.update_level("test")
                 for (ax, plotobj, plotopt) in zip(self.fig.axes, self.plotobjs, self.plotopts):
                     plotobj.plot(self.index, ax=ax, **plotopt)
                 self.canvas.draw()
