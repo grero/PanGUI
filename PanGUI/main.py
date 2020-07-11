@@ -207,6 +207,14 @@ class Main(QMainWindow, Ui_MainWindow):
                     if ii != idx:
                         self.plotobjs[ii].plot(self.index, ax=self.fig.axes[ii], **self.plotopts[ii])
 
+            numEvents, nidx = self.active_plotobj.plot(self.index, getNumEvents=True, **self.plotopts[idx])
+            if numEvents != self.numEvents:
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Warning)
+                msg.setText("""Warning: The selected object reports {0} event(s), while the current number of events is {1}.
+                        """.format(numEvents, self.numEvents))
+                msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                retval = msg.exec_()
             self.active_plotobj.plot(self.index, ax=self.fig.axes[idx], **self.plotopts[idx])
 
             self.canvas.draw()
