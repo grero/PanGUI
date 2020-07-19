@@ -50,6 +50,7 @@ class Main(QMainWindow, Ui_MainWindow):
         if linkyaxes is None:
             linkyaxes = range(len(self.plotobjs))
 
+        self.numEvents = 100_000
         for (i, plotobj) in enumerate(self.plotobjs):
             if linkxaxes[i] < i:
                 sharex = fig1.axes[linkxaxes[i]]
@@ -61,7 +62,12 @@ class Main(QMainWindow, Ui_MainWindow):
                 sharey = None
             ax = fig1.add_subplot(rows, cols, i+1, sharex=sharex,
                                   sharey=sharey)
+            nn, newIdx = plotobj.plot(self.index, getNumEvents=True)
+            self.numEvents = min(self.numEvents, nn)
             plotobj.plot(self.index, ax=ax, **self.plotopts[i])
+            if newIdx is not None and newIdx != self.index:
+                self.currentIndex.setText(str(newIdx))
+                self.updateIndex()
 
         self.active_plotobj = None
         self.active_axis = None
@@ -125,7 +131,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 action = QtWidgets.QAction(k, self)
                 action.setCheckable(True)
                 action.setChecked(v)
-               
+
                 if cpath:
                     qpath = "_".join((cpath, menu.title()))
                 else:
@@ -160,9 +166,12 @@ class Main(QMainWindow, Ui_MainWindow):
                 menu.addAction(action)
 
     def setplotopts(self, q):
-        # Kind of hackish, but needed since setplotopts currently gets called for any 
+        # Kind of hackish, but needed since setplotopts currently gets called for any
         # menu selection
-        replotAll = False
+        if len(self.plotobjs) > 1:
+            replotAll = False
+        else:
+            replotAll = True
         if q.text() == "Set all...":
             return None
         if self.active_plotobj is not None:
@@ -190,25 +199,22 @@ class Main(QMainWindow, Ui_MainWindow):
                 if okPressed:
                     # unwind the path
                     _opts[q.text()] = type(q.data()["value"])(text)
-                    if q.text() == "level":
-                        # this should be synchronised across objects
-                        replotAll = True
-                        for ii in range(len(self.plotopts)):
-                            _optsii = self.plotopts[ii]
-                            if qpath:
-                                cpath = qpath.split("_")
-                                for k in cpath:
-                                    _optsi = _optsii[k]
-                            _optsii[q.text()] = _opts[q.text()]
-            
+
             if replotAll:
-                # set index to 0
-                self.currentIndex.setText("0")
-                self.updateIndex()
+                # update all objects with the new level info
+                self.update_level(q.text())
                 for ii in range(len(self.plotobjs)):
                     if ii != idx:
                         self.plotobjs[ii].plot(self.index, ax=self.fig.axes[ii], **self.plotopts[ii])
 
+            numEvents, nidx = self.active_plotobj.plot(self.index, getNumEvents=True, **self.plotopts[idx])
+            if numEvents != self.numEvents:
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Warning)
+                msg.setText("""Warning: The selected object reports {0} event(s), while the current number of events is {1}.
+                        """.format(numEvents, self.numEvents))
+                msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                retval = msg.exec_()
             self.active_plotobj.plot(self.index, ax=self.fig.axes[idx], **self.plotopts[idx])
 
             self.canvas.draw()
@@ -247,6 +253,7 @@ class Main(QMainWindow, Ui_MainWindow):
             if result:
                 #TODO: Make this work for twinx as well
                 self.plotopts = plotopts
+                self.update_level("test")
                 for (ax, plotobj, plotopt) in zip(self.fig.axes, self.plotobjs, self.plotopts):
                     plotobj.plot(self.index, ax=ax, **plotopt)
                 self.canvas.draw()
@@ -267,7 +274,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     layout = QtWidgets.QVBoxLayout()
                     for (ii, oo) in enumerate(v.options):
                         rr = QtWidgets.QRadioButton(oo)
-                        if ii == v.checked: 
+                        if ii == v.checked:
                             rr.setChecked(True)
                         else:
                             rr.setChecked(False)
@@ -284,44 +291,57 @@ class Main(QMainWindow, Ui_MainWindow):
                     label = QtWidgets.QLabel(k)
                     layout.addWidget(label)
                     aa = QtWidgets.QLineEdit(str(v))
+                    # TODO: Handle the `level` keyword here
+                    # this should be synchronized across objects
                     aa.editingFinished.connect(lambda aa=aa, k=k:  plotopts.__setitem__(k, type(plotopts[k])(aa.text())))
                     layout.addWidget(aa)
                     dialog.addLayout(layout)
 
-
+    def update_level(self, level):
+        """
+        Updates the number of events for each object in accordance with level
+        """
+        # crazy high intial values so that the new value is always lower
+        num_events = 100_000
+        newIdx = 100_000
+        for (plotobj, plotopts) in zip(self.plotobjs, self.plotopts):
+            nn, _newIdx = plotobj.plot(self.index, getNumEvents=True, **plotopts)
+            num_events = min(num_events, nn)
+            newIdx = min(newIdx, _newIdx)
+        self.numEvents = num_events
+        self.currentIndex.setText(str(newIdx))
+        self.updateIndex()
 
     def update_index(self, new_index):
         index = self.index
-        for (plotobj, plotopts) in zip(self.plotobjs, self.plotopts):
-            nn = plotobj.plot(getNumEvents=True, **plotopts)
-            if 0 <= new_index < nn:
-                index = new_index
-            else:
-                index = self.index
+        if 0 <= new_index < self.numEvents:
+            index = new_index
+        else:
+            index = self.index
 
         self.index = index
 
     def gonext(self):
         self.update_index(self.index+1)
         self.currentIndex.setText(str(self.index))
+        self.plot()
+
+    def plot(self):
+        """
+        Call plot for each object with the current plot index.
+        """
         for _ax in self.fig.axes:
             _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, ax=self.fig.axes[i],**self.plotopts[i])
+            plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
+
         self.canvas.draw()
-        # I don't think should be necessary here, but the plot doesn't
-        # seem to update otherwise
         self.repaint()
 
     def goprev(self):
         self.update_index(self.index-1)
         self.currentIndex.setText(str(self.index))
-        for _ax in self.fig.axes:
-            _ax.clear()
-        for (i, plotobj) in enumerate(self.plotobjs):
-            plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
-        self.canvas.draw()
-        self.repaint()
+        self.plot()
 
     def updateIndex(self):
         self.update_index(int(self.currentIndex.text()))
