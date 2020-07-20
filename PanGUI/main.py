@@ -94,6 +94,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 axidx = self.fig.axes.index(event.inaxes)
                 if axidx < len(self.plotobjs):
                     plotobj = self.plotobjs[axidx]
+                    plotopts = self.plotopts[axidx]
                 else:
                     # e.g. ax is the result of twinx
                     # attempt to use axis position to figure out the index
@@ -102,12 +103,12 @@ class Main(QMainWindow, Ui_MainWindow):
                         pos1 = _ax.get_position()
                         if np.allclose(pos0, pos1):
                             plotobj = self.plotobjs[ii]
+                            plotopts = self.plotopts[ii]
                             break
 
 
                 self.active_plotobj = plotobj
 
-                plotopts = self.plotopts[axidx]
                 popupMenu = QtWidgets.QMenu(self)
                 self.create_menu(plotopts, popupMenu)
                 self.active_axis = event.inaxes
