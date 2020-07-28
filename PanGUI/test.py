@@ -85,10 +85,13 @@ class PlotObject(DPObject):
 def test(linkaxes=True):
     data1 = np.random.random((10, 1000))
     data2 = np.random.random((10, 1000))
+    data3 = np.random.random((10, 1000))
     pp1 = PlotObject(data1, normpath=False)
     pp1.dirs = ["session01/array01/channel001/cell01"]
     pp2 = PlotObject(data2, normpath=False)
     pp2.dirs = ["session01/array01/channel001/cell01"]
+    pp3 = PlotObject(data3, normpath=False)
+    pp3.dirs = ["session01/array01/channel001/cell01"]
 
     _pp1 = PlotObject(data1, normpath=False)
     _pp1.dirs = ["session01/array01/channel001/cell01"]
@@ -98,11 +101,15 @@ def test(linkaxes=True):
     _pp2.dirs = ["session01/array01/channel001/cell02"]
     pp2.append(_pp2)
 
+    _pp3 = PlotObject(data3, normpath=False)
+    _pp3.dirs = ["session01/array01/channel001/cell02"]
+    pp3.append(_pp3)
+
     if linkaxes:
-        ppg = PanGUI.create_window([pp1, pp2], linkxaxes=[0, 0],
-                                   linkyaxes=[0, 0])
+        ppg = PanGUI.create_window([pp1, pp2, pp3], linkxaxes=[0, 0, 0],
+                                   linkyaxes=[0, 0, 0])
     else:
-        ppg = PanGUI.create_window([pp1, pp2])
+        ppg = PanGUI.create_window([pp1, pp2, pp3])
     return ppg
 
 
