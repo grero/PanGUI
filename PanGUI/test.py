@@ -81,6 +81,14 @@ class PlotObject(DPObject):
         self.data = np.concatenate((self.data, obj.data), axis=0)
 
 
+def test_same_obj():
+    data1 = np.random.random((10, 1000))
+    pp1 = PlotObject(data1, normpath=False)
+    pp1.dirs = ["session01/array01/channel001/cell01"]
+    _pp1 = PlotObject(data1, normpath=False)
+    _pp1.dirs = ["session01/array01/channel001/cell01"]
+    pp1.append(_pp1)
+    ppg = PanGUI.create_window([pp1, pp1])
 
 def test(linkaxes=True):
     data1 = np.random.random((10, 1000))
