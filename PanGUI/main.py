@@ -39,7 +39,10 @@ class Main(QMainWindow, Ui_MainWindow):
         for plotopts in self.plotopts:
             for (k, v) in kwargs.items():
                 if k in plotopts.keys():
-                    plotopts[k] = v
+                    if isinstance(plotopts[k], DPT.objects.ExclusiveOptions):
+                        plotopts[k].select(v)
+                    else:
+                        plotopts[k] = v
 
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
