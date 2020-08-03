@@ -115,9 +115,9 @@ def test(linkaxes=True):
 
     if linkaxes:
         ppg = PanGUI.create_window([pp1, pp2, pp3], linkxaxes=[0, 0, 0],
-                                   linkyaxes=[0, 0, 0])
+                                   linkyaxes=[0, 0, 0], factor=0.1)
     else:
-        ppg = PanGUI.create_window([pp1, pp2, pp3])
+        ppg = PanGUI.create_window([pp1, pp2, pp3], factor=0.1)
     return ppg
 
 
