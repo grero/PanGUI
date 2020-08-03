@@ -71,6 +71,7 @@ class Main(QMainWindow, Ui_MainWindow):
 
         self.active_plotobj = None
         self.active_axis = None
+        self.active_obj_idx = 0
 
     def addmpl(self, fig):
         self.fig = fig
@@ -94,6 +95,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 axidx = self.fig.axes.index(event.inaxes)
                 if axidx < len(self.plotobjs):
                     plotobj = self.plotobjs[axidx]
+                    self.active_obj_idx  = axidx
                 else:
                     # e.g. ax is the result of twinx
                     # attempt to use axis position to figure out the index
@@ -102,12 +104,11 @@ class Main(QMainWindow, Ui_MainWindow):
                         pos1 = _ax.get_position()
                         if np.allclose(pos0, pos1):
                             plotobj = self.plotobjs[ii]
+                            self.active_obj_idx = ii
                             break
 
-
                 self.active_plotobj = plotobj
-
-                plotopts = self.plotopts[axidx]
+                plotopts = self.plotopts[self.active_obj_idx]
                 popupMenu = QtWidgets.QMenu(self)
                 self.create_menu(plotopts, popupMenu)
                 self.active_axis = event.inaxes
@@ -175,7 +176,9 @@ class Main(QMainWindow, Ui_MainWindow):
         if q.text() == "Set all...":
             return None
         if self.active_plotobj is not None:
-            idx = self.plotobjs.index(self.active_plotobj)
+            # TODO: Do we really need to do this?
+
+            idx = self.active_obj_idx
 
             plotopts = self.plotopts[idx]
 
