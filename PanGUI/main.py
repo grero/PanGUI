@@ -19,7 +19,7 @@ Ui_MainWindow, QMainWindow = loadUiType(guifile)
 
 class Main(QMainWindow, Ui_MainWindow):
     def __init__(self, plotobjs, rows=None, cols=None, indexer=None,
-                 linkxaxes=None, linkyaxes=None):
+                 linkxaxes=None, linkyaxes=None, **kwargs):
         """
 
         :type plotobject: object
@@ -36,6 +36,14 @@ class Main(QMainWindow, Ui_MainWindow):
         else:
             self.plotobjs = [plotobjs]
         self.plotopts = [plotobj.plot(getPlotOpts=True) for plotobj in self.plotobjs]
+        for plotopts in self.plotopts:
+            for (k, v) in kwargs.items():
+                if k in plotopts.keys():
+                    if isinstance(plotopts[k], DPT.objects.ExclusiveOptions):
+                        plotopts[k].select(v)
+                    else:
+                        plotopts[k] = v
+
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
         fig1.set_facecolor((0.92, 0.92, 0.92))
