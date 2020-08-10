@@ -70,6 +70,13 @@ class Main(QMainWindow, Ui_MainWindow):
                 sharey = None
             ax = fig1.add_subplot(rows, cols, i+1, sharex=sharex,
                                   sharey=sharey)
+
+            # explicitly update the x- and y-axis limits
+            if sharex is not None:
+                ax.set_xlim(sharex.get_xlim())
+            if sharey is not None:
+                ax.set_ylim(sharex.get_ylim())
+
             nn, newIdx = plotobj.plot(self.index, getNumEvents=True)
             self.numEvents = min(self.numEvents, nn)
             plotobj.plot(self.index, ax=ax, **self.plotopts[i])
