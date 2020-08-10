@@ -92,8 +92,8 @@ def test_same_obj():
 
 def test(linkaxes=True):
     data1 = np.random.random((10, 1000))
-    data2 = np.random.random((10, 1000))
-    data3 = np.random.random((10, 1000))
+    data2 = np.random.random((10, 2000))
+    data3 = np.random.random((10, 3000))
     pp1 = PlotObject(data1, normpath=False)
     pp1.dirs = ["session01/array01/channel001/cell01"]
     pp2 = PlotObject(data2, normpath=False)
@@ -105,7 +105,7 @@ def test(linkaxes=True):
     _pp1.dirs = ["session01/array01/channel001/cell01"]
     pp1.append(_pp1)
 
-    _pp2 = PlotObject(data1, normpath=False)
+    _pp2 = PlotObject(data2, normpath=False)
     _pp2.dirs = ["session01/array01/channel001/cell02"]
     pp2.append(_pp2)
 
