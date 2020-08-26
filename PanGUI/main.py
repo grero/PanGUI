@@ -36,6 +36,8 @@ class Main(QMainWindow, Ui_MainWindow):
         else:
             self.plotobjs = [plotobjs]
         self.plotopts = [plotobj.plot(getPlotOpts=True) for plotobj in self.plotobjs]
+        self.preOpts = []
+
         for plotopts in self.plotopts:
             for (k, v) in kwargs.items():
                 if k in plotopts.keys():
@@ -43,6 +45,11 @@ class Main(QMainWindow, Ui_MainWindow):
                         plotopts[k].select(v)
                     else:
                         plotopts[k] = v
+
+            current_opt = None
+            if "PlotType" in plotopts:
+                current_opt = plotopts["PlotType"].selected()
+            self.preOpts += [current_opt]
 
         self.currentIndex.setText(str(self.index))
         fig1 = Figure()
@@ -218,7 +225,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     if ii != idx:
                         self.plotobjs[ii].plot(self.index, ax=self.fig.axes[ii], **self.plotopts[ii])
 
-            numEvents, nidx = self.active_plotobj.plot(self.index, getNumEvents=True, **self.plotopts[idx])
+            numEvents, nidx = self.active_plotobj.plot(self.index, getNumEvents=True, preOpt=self.preOpts[idx], **self.plotopts[idx])
             if numEvents != self.numEvents:
                 msg = QtWidgets.QMessageBox()
                 msg.setIcon(QtWidgets.QMessageBox.Warning)
@@ -315,8 +322,8 @@ class Main(QMainWindow, Ui_MainWindow):
         # crazy high intial values so that the new value is always lower
         num_events = 100_000
         newIdx = 100_000
-        for (plotobj, plotopts) in zip(self.plotobjs, self.plotopts):
-            nn, _newIdx = plotobj.plot(self.index, getNumEvents=True, **plotopts)
+        for (i, plotobj) in enumerate(self.plotobjs):
+            nn, _newIdx = plotobj.plot(self.index, getNumEvents=True, preOpt=self.preOpts[i], **self.plotopts[i])
             num_events = min(num_events, nn)
             newIdx = min(newIdx, _newIdx)
         self.numEvents = num_events
