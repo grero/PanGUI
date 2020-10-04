@@ -53,7 +53,7 @@ class Main(QMainWindow, Ui_MainWindow):
         if cols is None:
             cols = 1
         if rows is None:
-            rows = np.ceil(len(self.plotobjs)/cols)
+            rows = int(np.ceil(len(self.plotobjs)/cols))
 
         if linkxaxes is None:
             linkxaxes = range(len(self.plotobjs))
