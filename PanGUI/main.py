@@ -30,6 +30,8 @@ class Main(QMainWindow, Ui_MainWindow):
         self.nextButton.clicked.connect(self.gonext)
         self.currentIndex.editingFinished.connect(self.updateIndex)
         self.index = 0
+        self.linkxaxes = linkxaxes
+        self.linkyaxes = linkyaxes
         # hack to allow singleton argument here
         if hasattr(plotobjs, '__getitem__'):
             self.plotobjs = plotobjs
@@ -58,31 +60,36 @@ class Main(QMainWindow, Ui_MainWindow):
         if linkyaxes is None:
             linkyaxes = range(len(self.plotobjs))
 
-        self.numEvents = 100_000
+        self.numEvents = 100000
         for (i, plotobj) in enumerate(self.plotobjs):
-            if linkxaxes[i] < i:
-                sharex = fig1.axes[linkxaxes[i]]
-            else:
-                sharex = None
-            if linkyaxes[i] < i:
-                sharey = fig1.axes[linkxaxes[i]]
-            else:
-                sharey = None
-            ax = fig1.add_subplot(rows, cols, i+1, sharex=sharex,
-                                  sharey=sharey)
-
-            # explicitly update the x- and y-axis limits
-            if sharex is not None:
-                ax.set_xlim(sharex.get_xlim())
-            if sharey is not None:
-                ax.set_ylim(sharex.get_ylim())
-
+            ax = fig1.add_subplot(rows, cols, i+1)
+        
             nn, newIdx = plotobj.plot(self.index, getNumEvents=True)
             self.numEvents = min(self.numEvents, nn)
             plotobj.plot(self.index, ax=ax, **self.plotopts[i])
             if newIdx is not None and newIdx != self.index:
                 self.currentIndex.setText(str(newIdx))
                 self.updateIndex()
+
+        # set up axes sharing
+        for (i, plotobj) in enumerate(self.plotobjs):
+            ax = fig1.axes[i]
+            if linkxaxes[i] != i:
+                sharex = fig1.axes[linkxaxes[i]]
+            else:
+                sharex = None
+            if linkyaxes[i] != i:
+                sharey = fig1.axes[linkyaxes[i]]
+            else:
+                sharey = None
+
+            # explicitly update the x- and y-axis limits
+            if sharex is not None:
+                ax.set_xlim(sharex.get_xlim())
+                ax.sharex(sharex)
+            if sharey is not None:
+                ax.set_ylim(sharey.get_ylim())
+                ax.sharey(sharey)
 
         self.active_plotobj = None
         self.active_axis = None
@@ -352,6 +359,23 @@ class Main(QMainWindow, Ui_MainWindow):
             _ax.clear()
         for (i, plotobj) in enumerate(self.plotobjs):
             plotobj.plot(self.index, ax=self.fig.axes[i], **self.plotopts[i])
+
+        for (i, plotobj) in enumerate(self.plotobjs):
+            # explicitly set the limits based on shared
+            ax = self.fig.axes[i]
+            if self.linkxaxes[i] != i:
+                # unshare, then re-share (what a stupid solution)
+                sharex = self.fig.axes[self.linkxaxes[i]]
+                x_trf = ax.xaxis.get_transform()
+                dl = sharex.dataLim
+                x0, x1 = x_trf.transform(dl.intervalx)
+                xr = x1-x0
+                x0 -= 0.05*xr
+                x1 += 0.05*xr
+                ax.set_xlim(x0, x1)
+            if self.linkyaxes[i] != i:
+                sharey = self.fig.axes[self.linkyaxes[i]]
+                ax.set_ylim(sharey.dataLim.y0, sharey.dataLim.y1)
 
         self.canvas.draw()
         self.repaint()
