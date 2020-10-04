@@ -90,7 +90,7 @@ def test_same_obj():
     pp1.append(_pp1)
     ppg = PanGUI.create_window([pp1, pp1])
 
-def test(linkaxes=True):
+def test(linkaxes=range(3)):
     data1 = np.random.random((10, 1000))
     data2 = np.random.random((10, 2000))
     data3 = np.random.random((10, 3000))
@@ -113,11 +113,8 @@ def test(linkaxes=True):
     _pp3.dirs = ["session01/array01/channel001/cell02"]
     pp3.append(_pp3)
 
-    if linkaxes:
-        ppg = PanGUI.create_window([pp1, pp2, pp3], linkxaxes=[0, 0, 0],
-                                   linkyaxes=[0, 0, 0], factor=0.1, color="green")
-    else:
-        ppg = PanGUI.create_window([pp1, pp2, pp3], factor=0.1, color="green")
+    ppg = PanGUI.create_window([pp1, pp2, pp3], linkxaxes=linkaxes,
+                               linkyaxes=linkaxes, factor=0.1, color="green")
     return ppg
 
 
