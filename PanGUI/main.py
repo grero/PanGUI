@@ -364,7 +364,9 @@ class Main(QMainWindow, Ui_MainWindow):
             # explicitly set the limits based on shared
             ax = self.fig.axes[i]
             if self.linkxaxes[i] != i:
-                # unshare, then re-share (what a stupid solution)
+                # since x/y-lims appears to be fixed by sharex/sharey
+                # here we epxlicitly set them based on datalimits of
+                # the axes that this axis is linked to
                 sharex = self.fig.axes[self.linkxaxes[i]]
                 x_trf = ax.xaxis.get_transform()
                 dl = sharex.dataLim
