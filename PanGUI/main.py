@@ -30,8 +30,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.nextButton.clicked.connect(self.gonext)
         self.currentIndex.editingFinished.connect(self.updateIndex)
         self.index = 0
-        self.linkxaxes = linkxaxes
-        self.linkyaxes = linkyaxes
         # hack to allow singleton argument here
         if hasattr(plotobjs, '__getitem__'):
             self.plotobjs = plotobjs
@@ -60,6 +58,8 @@ class Main(QMainWindow, Ui_MainWindow):
         if linkyaxes is None:
             linkyaxes = range(len(self.plotobjs))
 
+        self.linkxaxes = linkxaxes
+        self.linkyaxes = linkyaxes
         self.numEvents = 100000
         for (i, plotobj) in enumerate(self.plotobjs):
             ax = fig1.add_subplot(rows, cols, i+1)
