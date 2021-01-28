@@ -207,15 +207,19 @@ class Main(QMainWindow, Ui_MainWindow):
             # unwind path
             qpath = q.data()["path"]
             _opts = plotopts
+            _popts = self.preOpts[idx]
             if qpath:
                 cpath = qpath.split("_")
                 for k in cpath:
                     _opts = _opts[k]
+                    _popts = _popts[k]
 
             if isinstance(_opts, DPT.objects.ExclusiveOptions):
                 if q.isChecked():
+                    _popts.select(_opts.selected)
                     _opts.select(q.text())
             elif q.isCheckable():
+                _popts[q.text()] = _opts[q.text()]
                 _opts[q.text()] = q.isChecked()
             elif not q.isCheckable() and q.menu() is None:  # Text input
                 text, okPressed = QtWidgets.QInputDialog.getText(self,q.text(),"",
@@ -223,6 +227,7 @@ class Main(QMainWindow, Ui_MainWindow):
                                                                  str(q.data()["value"]))
                 if okPressed:
                     # unwind the path
+                    _popts[q.text()] = _opts[q.text()]
                     _opts[q.text()] = type(q.data()["value"])(text)
 
             if replotAll:
