@@ -170,7 +170,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 self.create_menu(v, subMenu, qpath)
             elif isinstance(v, DPT.objects.ExclusiveOptions):
                 subMenu = menu.addMenu(k)
-                ag = QtWidgets.QActionGroup(self, exclusive=True)
+                ag = QtWidgets.QActionGroup(self, exclusionPolicy=1)
                 for (ii, oo) in enumerate(v.options):
                     action = ag.addAction(QtWidgets.QAction(oo, self, checkable=True))
                     if cpath != "":
